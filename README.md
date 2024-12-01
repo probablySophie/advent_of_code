@@ -9,7 +9,7 @@ https://adventofcode.com/2024
 
 Total ⭐: 1/50
 
-Day &emsp14;1: ⭐⭐
+Day &emsp14;1: ⭐⭐  
 Day &emsp14;2:  
 Day &emsp14;3:  
 Day &emsp14;4:  
