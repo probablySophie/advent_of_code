@@ -5,7 +5,7 @@ With Rust 🦀!
 
 https://adventofcode.com/2024
 
-This is a big Repo with multiple years, so you'll need to go into `aoc_XXXX` for 
+This is a big Repo with multiple years, so you'll need to go into `aoc_XXXX` for the years and then just `cargo run`!
 
 ****
 
