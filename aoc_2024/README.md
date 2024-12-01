@@ -1,15 +1,17 @@
 
 ## 2024 Advent of Code
 
-With Rust!
+With Rust 🦀!
 
 https://adventofcode.com/2024
+
+This is a big Repo with multiple years, so you'll need to go into `aoc_XXXX` for 
 
 ****
 
 Total ⭐: 2/50
 
-Day &emsp14;1: ⭐⭐ 
+Day &emsp14;1: ⭐⭐  
 Day &emsp14;2:  
 Day &emsp14;3:  
 Day &emsp14;4:  
