@@ -17,6 +17,9 @@ fn main()
 	    "1" => {
 	        days::one::go();
 	    },
+	    "2" => {
+	        days::two::go();
+	    }
 	    _ => {
 	        println!("{}", "Unrecognised input".yellow());
 	    },

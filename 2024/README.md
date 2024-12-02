@@ -9,10 +9,10 @@ This is a big Repo with multiple years, so you'll need to go into `aoc_XXXX` for
 
 ****
 
-Total ⭐: 2/50
+Total ⭐: 4/50
 
 Day &emsp14;1: ⭐⭐  
-Day &emsp14;2:  
+Day &emsp14;2: ⭐⭐  
 Day &emsp14;3:  
 Day &emsp14;4:  
 Day &emsp14;5:  

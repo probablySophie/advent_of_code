@@ -1,1 +1,1 @@
-aoc_2024/README.md
+2024/README.md
