@@ -1,6 +1,6 @@
 
 use colored::Colorize;
-const INPUT: &str = include_str!("../../input/two.txt");
+const INPUT: &str = include_str!("../../input/2.txt");
 /* const INPUT: &str = "7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1

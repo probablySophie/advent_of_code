@@ -10,7 +10,7 @@ use core::panic;
 
 use colored::Colorize;
 
-const INPUT: &str = include_str!("../../input/one.txt");
+const INPUT: &str = include_str!("../../input/1.txt");
 
 pub fn go()
 {
