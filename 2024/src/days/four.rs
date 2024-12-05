@@ -1,5 +1,3 @@
-use std::ops::Sub;
-
 use colored::Colorize;
 
 #[allow(unused)]
@@ -160,6 +158,8 @@ fn part_two(input_grid: &[Vec<char>]) -> i32
 			// Find an A
 			if c != &'A' { continue }
 
+			// Check the diagonals around the A to see if they're Ms and Ss
+			// This is very hacky ._.
 			match
 			(
 				char_at(input_grid, x, y, (-1, -1)),
