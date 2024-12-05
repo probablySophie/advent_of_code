@@ -15,7 +15,7 @@ Day &emsp14;1: ⭐⭐
 Day &emsp14;2: ⭐⭐  
 Day &emsp14;3: ⭐⭐  
 Day &emsp14;4: ⭐⭐  
-Day &emsp14;5:  
+Day &emsp14;5: ⭐⭐  
 Day &emsp14;6:  
 Day &emsp14;7:  
 Day &emsp14;8:  

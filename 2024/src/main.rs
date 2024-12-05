@@ -29,6 +29,7 @@ fn main()
 		"2" => days::two::go(),
 		"3" => days::three::go(),
 		"4" => days::four::go(),
+		"5" => days::five::go(),
 		_ => {
 			println!("{}", "Unrecognised input".yellow());
 		},
