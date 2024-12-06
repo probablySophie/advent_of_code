@@ -127,9 +127,11 @@ fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool
 	let mut guard_direction = Direction::Up;
 	let mut guard_location = starting_location;
 
+	let mut num_turns = 0;
+	let mut did_180 = false;
+
 	for _ in 0..=10000
 	{
-		
 		// Else take a step
 		let Some(new_pos) = step(guard_location, &guard_direction)
 		else { return false };
@@ -142,22 +144,38 @@ fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool
 		|| new_map[new_pos.1][new_pos.0] == 'O'
 		{
 			guard_direction = guard_direction.turn_right();
+			num_turns += 1;
 		}
 		else
 		{
-			guard_location = new_pos;
-			
-			new_map[guard_location.1][guard_location.0] = 
-				match (new_map[guard_location.1][guard_location.0], guard_direction)
+			// INFO: This check just here catches 152 endless loops!! (from 6.txt)
+			// did we just turn?
+			if num_turns > 0
+			{
+				match ( num_turns, did_180 )
 				{
-					('.'|'|', Direction::Up   | Direction::Down  ) => '|',
-					('.'|'-', Direction::Left | Direction::Right ) => '-',
-					('-', Direction::Up   | Direction::Down  ) | 
-					('|', Direction::Left | Direction::Right ) | 
-					('+', _) => '+',
-					('^', _) => '^',
-					_ => '?'
-				};
+					// We did a 180
+					(2, false) => { did_180 = true },
+					// We've done two 180s in a row.  That's a loop babeey
+					(2, true)  => { return true },
+					// Else we didn't just do a 180
+					_ => { did_180 = false },
+				}
+				// And reset
+				num_turns = 0;
+			}
+			// Mark where we've been & which direction we were going
+			new_map[guard_location.1][guard_location.0] = guard_direction.guard_from_dir();
+			
+			guard_location = new_pos;
+
+			// We've already been here before and going this same direction!?
+			// INFO: This check catches 1684 loops!! (from 6.txt)
+			if new_map[guard_location.1][guard_location.0]
+			== guard_direction.guard_from_dir()
+			{
+				return true
+			}
 		}
 		
 		// Are we back at the starting point facing the correct direction?
@@ -173,6 +191,7 @@ fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool
 	// If we've taken more that 1000 steps, then it's PROBABLY true
 	// println!("\n{obstical_location:?}");
 	// print_map(&new_map);
+	// INFO: We now have no timeouts!!!!
 	true
 }
 
@@ -188,7 +207,7 @@ enum Direction
 }
 impl Direction
 {
-	pub fn turn_right(&self) -> Self
+	pub fn turn_right(self) -> Self
 	{
 		match self
 		{
@@ -198,7 +217,7 @@ impl Direction
 		    Direction::Right => Direction::Down,
 		}
 	}
-	pub fn guard_from_dir(&self) -> char
+	pub fn guard_from_dir(self) -> char
 	{
 		match self
 		{
