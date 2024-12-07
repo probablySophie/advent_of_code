@@ -1,5 +1,3 @@
-use colored::Colorize;
-
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/7.txt");
 #[allow(unused)]
@@ -15,6 +13,8 @@ const EXAMPLE_INPUT_1: &str = "190: 10 19
 #[allow(unused)]
 const EXAMPLE_INPUT_2: &str = "";
 
+type ResultType = i64;
+
 // https://adventofcode.com/2024/day/7
 pub fn go()
 {
@@ -22,38 +22,40 @@ pub fn go()
 	let equations = parse_input(INPUT);
 	// let equations = parse_input(EXAMPLE_INPUT_1);
 
-	println!("\t{}\n\tTotal calibration result: {}",
-		"Part 1".bold(),
-		part_one(&equations)
-	);
+	let time_before = std::time::Instant::now();
+	let part_one_result = part_one(&equations);
+	let time_elapsed = time_before.elapsed();
+	util::print_result("Part 1", time_elapsed, "Total calibration result", &part_one_result);
+
+	println!();
 	
-	println!("\t{}\n\tTotal result with new operator: {}",
-		"Part 2".bold(),
-		part_two(&equations)
-	);
+	let time_before = std::time::Instant::now();
+	let part_one_result = part_two(&equations);
+	let time_elapsed = time_before.elapsed();
+	util::print_result("Part 2", time_elapsed, "Total result with new operator", &part_one_result);
 }
 
 /// See if the total can be made using the arguments using only `*` and `+`
 /// Return the sum of the totals that *can* be made in this way
 /// Operators are evaluated **left-to-right**.  Not in usual BIDMAS
-fn part_one(equations: &[Equation]) -> i64
+fn part_one(equations: &[Equation]) -> ResultType
 {
 	do_the_thing(equations, &['*', '+'])
 }
 
 /// Same as part 1, but there's now a new operator: `||`
-fn part_two(equations: &[Equation]) -> i64
+fn part_two(equations: &[Equation]) -> ResultType
 {
 	do_the_thing(equations, &['*', '+', '|'])
 }
 
 #[allow(clippy::cast_possible_truncation)]
-fn do_the_thing(equations: &[Equation], operators: &[char]) -> i64
+fn do_the_thing(equations: &[Equation], operators: &[char]) -> ResultType
 {
 	let mut total_sum = 0;
 	'equationLoop: for equation in equations
 	{
-		let mut totals: Vec<i64> = Vec::new();
+		let mut totals: Vec<ResultType> = Vec::new();
 
 		// Calculate all the possible totals
 		for num in &equation.arguments
@@ -61,7 +63,7 @@ fn do_the_thing(equations: &[Equation], operators: &[char]) -> i64
 			// Just push the first number
 			if totals.is_empty() { totals.push(*num); continue }
 			// Else
-			let mut new_totals: Vec<i64> = Vec::new();
+			let mut new_totals: Vec<ResultType> = Vec::new();
 
 			while let Some(total) = totals.pop()
 			{
@@ -90,12 +92,10 @@ fn do_the_thing(equations: &[Equation], operators: &[char]) -> i64
 			continue 'equationLoop;
 		}
 	}
-
 	total_sum
 }
 
-
-fn validate_totals(real_total: i64, totals: &[i64]) -> bool
+fn validate_totals(real_total: ResultType, totals: &[ResultType]) -> bool
 {
 	for total in totals
 	{
@@ -104,7 +104,7 @@ fn validate_totals(real_total: i64, totals: &[i64]) -> bool
 			return true
 		}
 	}
-	return false
+	false // return false
 }
 
 fn parse_input(input: &str) -> Vec<Equation>
@@ -121,16 +121,16 @@ fn parse_input(input: &str) -> Vec<Equation>
 			continue
 		};
 		
-		let Ok(total) = line[0..colon_i].parse::<i64>()
+		let Ok(total) = line[0..colon_i].parse::<ResultType>()
 		else {
-			println!("Failed to convert total to i64");
+			println!("Failed to convert total to ResultType");
 			continue
 		};
 		equations.push(Equation
 		{
 			total,
 			arguments: line[ colon_i+1 .. ].split_whitespace().map(
-				|v_str| { v_str.parse::<i64>().expect("failed to convert to i64") }
+				|v_str| { v_str.parse::<ResultType>().expect("failed to convert to ResultType") }
 			).collect(),
 		});
 	}
@@ -141,6 +141,6 @@ fn parse_input(input: &str) -> Vec<Equation>
 #[derive(Debug)]
 struct Equation
 {
-	pub total: i64,
-	pub arguments: Vec<i64>
+	pub total: ResultType,
+	pub arguments: Vec<ResultType>
 }

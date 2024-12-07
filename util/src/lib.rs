@@ -12,6 +12,17 @@ pub fn read_line_into(string: &mut String) -> bool
 	}
 }
 
+/// Prints a day's part's result!
+pub fn print_result<T: ToString>(part: &str, time_elapsed: std::time::Duration, description: &str, result: &T)
+{
+	println!("\t{} took {:.2?} to calculate\n\t{}: {}",
+		part.bold(),
+		time_elapsed,
+		description,
+		result.to_string().bold(),
+	);
+}
+
 /// Takes an `&str`
 /// 1. Breaks it into lines `[line, line]`
 /// 2. Breaks the lines by whitespace `[[str, str], [str, str]]`
