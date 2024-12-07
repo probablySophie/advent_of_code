@@ -47,13 +47,14 @@ fn part_one(map: &mut LevelMap) -> i32
 
 	'mainloop: loop
 	{
+		// Record where we've been!
 		map[guard_location.1][guard_location.0] = 'X';
 		
 		// Take a step
 		let Some(new_pos) = step(guard_location, &guard_direction)
 		// Else we've left the map left/top
 		else { break 'mainloop; };
-		// And check if we've left right/bottom
+		// And check if we've exited on the right/bottom
 		if new_pos.0 > (map[0].len() - 1) || new_pos.1 > (map.len() - 1)
 		{ break 'mainloop; }
 
@@ -61,10 +62,12 @@ fn part_one(map: &mut LevelMap) -> i32
 		if map[new_pos.1][new_pos.0] == '#'
 		{
 			guard_direction = guard_direction.turn_right();
-			continue;
 		}
-		// Update the guard's location
-		guard_location = new_pos;
+		else
+		{
+			// Update the guard's location
+			guard_location = new_pos;
+		}
 	}
 	// print_map(map);
 	count_points(map)
@@ -73,9 +76,7 @@ fn part_one(map: &mut LevelMap) -> i32
 fn part_two(map: &mut LevelMap) -> i32
 {
 	// Work out everywhere that adding a single new obstical would cause a loop
-	// But not the guard's starting space
-
-	// WARN: This solution is painfully inefficient
+	// But it can't be the guard's starting space
 
 	let mut loop_spots = Vec::new();
 	
@@ -121,11 +122,10 @@ fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool
 	let mut new_map = map.clone();
 	new_map[obstical_location.1][obstical_location.0] = 'O';
 	
-	let Some(starting_location) = get_guard_loc(&new_map)
+	let Some(mut guard_location) = get_guard_loc(&new_map)
 	else { return false };
 
 	let mut guard_direction = Direction::Up;
-	let mut guard_location = starting_location;
 
 	let mut num_turns = 0;
 	let mut did_180 = false;
@@ -148,10 +148,10 @@ fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool
 		}
 		else
 		{
-			// INFO: This check just here catches 152 endless loops!! (from 6.txt)
 			// did we just turn?
 			if num_turns > 0
 			{
+				// INFO: This check just here catches 152 endless loops!! (from 6.txt)
 				match ( num_turns, did_180 )
 				{
 					// We did a 180
@@ -176,17 +176,7 @@ fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool
 			{
 				return true
 			}
-		}
-		
-		// Are we back at the starting point facing the correct direction?
-		if guard_location.0 == starting_location.0
-		&& guard_location.1 == starting_location.1
-		&& guard_direction == Direction::Up
-		{
-			// println!("\n{obstical_location:?}");
-			// print_map(&new_map);
-			return true
-		}
+		}		
 	}
 	// If we've taken more that 1000 steps, then it's PROBABLY true
 	// println!("\n{obstical_location:?}");
@@ -304,30 +294,4 @@ fn step(guard_pos: (usize, usize), direction: &Direction) -> Option<(usize, usiz
 	}
 	// Else
 	Some(( check_pos.0.unwrap(), check_pos.1.unwrap() ))
-}
-
-fn should_turn(map: &LevelMap, direction: &Direction) -> bool
-{
-	let Some(guard_pos) = get_guard_loc(map)
-	else { return false };
-
-	let Some(check_pos) = step(guard_pos, direction)
-	else { return false };
-	
-	// Are we checking outside of the map?
-	if check_pos.0 > map[0].len() - 1
-	|| check_pos.1 > map.len() - 1
-	{
-		return false // yes
-	}
-
-	// Is the space occupied
-	if map[ check_pos.1 ][ check_pos.0 ] == '.'
-	|| map[ check_pos.1 ][ check_pos.0 ] == 'X'
-	{
-		return false // no
-	}
-
-	// The space is occipied
-	true
 }

@@ -6,6 +6,8 @@ const INPUT: &str = include_str!("../../input/~DAY_NUM~.txt");
 const EXAMPLE_INPUT_1: &str = "";
 #[allow(unused)]
 const EXAMPLE_INPUT_2: &str = "";
+
+//https://adventofcode.com/2024/day/~DAY_NUM~
 pub fn go()
 {
 	println!("Day ~DAY_NUM~");
