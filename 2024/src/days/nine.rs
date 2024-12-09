@@ -64,62 +64,111 @@ fn part_one() -> ResultType
 #[allow(clippy::needless_range_loop)]
 fn part_two() -> ResultType
 {
-	let mut frags = Vec::new();	
-	let mut is_file = true;
-	let mut file_id = 0;
+	let input = INPUT;
+	// let input = EXAMPLE_INPUT_1;
+	
+	let mut frags = fancy_frags(input); // Get our frags, but as (file_id, size)	
+	let mut empties = get_empties(&frags); // Get the empties, but as (location, size)
+	
+	let mut processed = 0;
+	// Do the moves :)
+	
+	while processed < frags.len()
+	{
+		processed += 1;
+		let i = frags.len() - processed;
+		
+		let (file_id, block_size) = frags[i];
+		if file_id == -1 { continue } // Skip if empty
 
-	// Get our frags, but as (file_id, size)
-	for c in INPUT.chars()
+		// Find a valid empty
+		let mut empty_i: Option<usize> = None;
+		let mut empty_size = 0;
+		for x in 0..empties.len()
+		{
+			if empties[x].0 > i
+			{
+				break;
+			}
+			// Else
+			if empties[x].1 >= block_size
+			{
+				// We have space!
+				empty_i = Some(empties[x].0);
+				if empties[x].1 == block_size
+				{
+					empties.remove(x);
+					break;
+				}
+				// Else there will still be some space
+				empties[x].1 -= block_size;
+				empty_size = empties[x].1;
+				break;
+			}
+		}
+		let Some(empty_i) = empty_i
+		else { continue };
+
+		// Do the actual swap
+		frags[empty_i] = frags[i];
+		frags[i] = (-1, block_size);
+		if empty_size != 0
+		{
+			for empty in &mut empties
+			{
+				if empty.0 >= empty_i
+				{
+					empty.0 += 1;
+				}
+			}
+			frags.insert(empty_i+1, (-1, empty_size));
+		}
+	}
+
+	let checksum = calculate_checksum(&make_single_frags(&frags));
+	match input
+	{
+		INPUT => assert_eq!(checksum, 6_431_472_344_710),
+		EXAMPLE_INPUT_1 => assert_eq!(checksum, 2858),
+		_ => {},
+	}
+	checksum
+}
+
+fn fancy_frags(input: &str) -> Vec<(ResultType, usize)>
+{
+	let mut is_file = true;
+	let mut file_id: ResultType = 0;
+	let mut frags = Vec::new();
+	for c in input.chars()
 	{
 		if ! c.is_numeric() { continue };
 		let size: usize = c.to_string().parse().expect("Failed to convert to usize");
-		let now = if is_file { file_id } else { -1 };
-		frags.push( ( ResultType::from(now) , size ) );
+		let now = if is_file {
+				file_id
+			} else {
+				-1
+			};
+		frags.push( ( now , size ) );
 
 		if is_file {file_id += 1};
 		is_file = !is_file; // we alternate between free space & file block sizes
 	}
+	frags
+}
 
-	// Do the moves :)
-	for i in (0..frags.len()).rev()
-	{
-		let (file_id, block_size) = frags[i];
-		// Skip if its an empty spot
-		if file_id == -1 { continue }
+fn get_empties(frags: &[(ResultType, usize)]) -> Vec<(usize, usize)>
+{
+	let mut empties = Vec::new();
 
-		let mut empty_index: Option<usize> = None;
-		let mut empty_space = 0;
-		for i in 0..frags.len()
+	(0..frags.len()).for_each(|i| {
+		if frags[i].0 == -1
 		{
-			if frags[i].0 != -1 {continue};
-			let empty_size = frags[i].1;
-			
-			if empty_size >= block_size
-			{
-				empty_index = Some(i);
-				empty_space = empty_size;
-				break;
-			}
+			empties.push((i, frags[i].1));
 		}
-		let empty_index = match empty_index
-		{	None    => continue,
-			Some(v) => v,
-		};
-		if empty_index > i
-		{
-			continue;
-		}
-		// println!("{i}->{empty_index} moving: {}", frags[i].0);
-		frags[empty_index] = frags[i];
-		frags[i] = (-1, block_size);
-		if empty_space-block_size > 0
-		{
-			frags.insert(empty_index+1, (-1, empty_space-block_size));
-		}
-		// print_frags(&make_single_frags(&frags));
-	}
+	});
 
-	calculate_checksum(&make_single_frags(&frags))
+	empties
 }
 
 fn make_single_frags(frags: &[(ResultType, usize)]) -> Vec<ResultType>
@@ -187,16 +236,4 @@ fn disk_map_to_file_space(input: & str) -> Vec<ResultType>
 	}
 
 	frags
-}
-
-fn find_empty(ids: &[ResultType]) -> Option<usize>
-{
-	for (i, id) in ids.iter().enumerate()
-	{
-		if *id == -1
-		{
-			return Some(i)
-		}
-	}
-	None
 }
