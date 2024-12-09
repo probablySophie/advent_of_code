@@ -38,15 +38,17 @@ pub fn go()
 	println!("Day 5");
 	let (page_order_pairs, update_sets) = parse_input(INPUT);
 
-	println!("\t{}\n\tThe correctly ordered sum is: {}",
-		"Part 1".bold(),
-		part_one(&page_order_pairs, &update_sets)
-	);
+	let time_before = std::time::Instant::now();
+	let part_one_result = part_one(&page_order_pairs, &update_sets);
 	
-	println!("\t{}\n\tThe incorrectly ordered sum is: {}",
-		"Part 2".bold(),
-		part_two(&page_order_pairs, &update_sets)
-	);
+	util::print_result("Part 1", time_before.elapsed(), "The correctly ordered sum is", &part_one_result);
+
+	println!();
+	
+	let time_before = std::time::Instant::now();
+	let part_two_result = part_two(&page_order_pairs, &update_sets);
+	
+	util::print_result("Part 2", time_before.elapsed(), "The incorrectly ordered sum is", &part_two_result);	
 }
 
 

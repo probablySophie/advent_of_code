@@ -49,15 +49,17 @@ pub fn go()
 		grid.push( line.chars().collect() );
 	}
 
-	println!("\t{}\n\tThe number of times 'XMAS' appears is: {}",
-		"Part 1".bold(),
-		part_one(&grid)
-	);
+	let time_before = std::time::Instant::now();
+	let part_one_result = part_one(&grid);
 	
-	println!("\t{}\n\tThe number of times an 'X-MAS' appears is: {}",
-		"Part 2".bold(),
-		part_two(&grid)
-	);
+	util::print_result("Part 1", time_before.elapsed(), "The number of times 'XMAS' appears is", &part_one_result);
+
+	println!();
+	
+	let time_before = std::time::Instant::now();
+	let part_two_result = part_two(&grid);
+	
+	util::print_result("Part 2", time_before.elapsed(), "The number of times an 'X-MAS' appears is", &part_two_result);	
 }
 
 #[allow(clippy::cast_sign_loss)]

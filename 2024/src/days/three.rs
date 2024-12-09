@@ -1,4 +1,3 @@
-use colored::Colorize;
 use regex::Regex;
 
 const INPUT: &str = include_str!("../../input/3.txt");
@@ -9,16 +8,18 @@ const INPUT: &str = include_str!("../../input/3.txt");
 pub fn go()
 {
 	println!("Day 3");
-
-	println!("\t{}\n\tThe multiplication total: {}",
-		"Part 1".bold(),
-		part_one()
-	);
 	
-	println!("\t{}\n\tThe revised multiplication total: {}",
-		"Part 2".bold(),
-		part_two()
-	);
+	let time_before = std::time::Instant::now();
+	let part_one_result = part_one();
+	
+	util::print_result("Part 1", time_before.elapsed(), "The multiplication total", &part_one_result);
+
+	println!();
+	
+	let time_before = std::time::Instant::now();
+	let part_two_result = part_two();
+	
+	util::print_result("Part 2", time_before.elapsed(), "The revised multiplication total", &part_two_result);	
 }
 
 fn parse_mul(mul: &str) -> i32

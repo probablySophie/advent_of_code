@@ -6,25 +6,21 @@
 // Calculate the distance between each pair
 // Add up all the distances
 
-use core::panic;
-
-use colored::Colorize;
-
 const INPUT: &str = include_str!("../../input/1.txt");
 
 pub fn go()
 {
 	println!("Day 1:");
 
-	println!("\t{}\n\tThe total distance is: {}",
-		"Part 1".bold(),
-		part_one()
-	);
+	let time_before = std::time::Instant::now();
+	let part_one_result = part_one();
 
-	println!("\t{}\n\tThe similarity score is: {}",
-		"Part 2".bold(),
-		part_two(),
-	);
+	util::print_result("Part 1", time_before.elapsed(), "The total distance is", &part_one_result);
+
+	let time_before = std::time::Instant::now();
+	let part_two_result = part_two();
+	
+	util::print_result("Part 2", time_before.elapsed(), "The similarity score is", &part_two_result);
 }
 
 fn part_one() -> i32
@@ -105,32 +101,13 @@ fn line_to_i32s( line: &str ) -> ( i32, i32 )
 {
 	let mut split = line.split_whitespace();
 
-	let num_1 = match split.next()
-		{
-			None => panic!( "Couldn't split 1 from line {}", line ),
-			Some(str) => 
-			{
-				str_to_i32(str)
-			}
-		};
-	
-	let num_2 = match split.next()
-		{
-			None => panic!( "Couldn't get split 2 from line {}", line ),
-			Some(str) => 
-			{
-				str_to_i32(str)
-			}
-		};
+	let num_1 = str_to_i32( split.next().expect("Couldn't get split 1") );
+	let num_2 = str_to_i32( split.next().expect("Couldn't get split 2") );
 
 	( num_1, num_2 )
 }
 
 fn str_to_i32(str: &str) -> i32
 {
-	match str.parse::<i32>()
-	{
-		Err(error) => panic!( "Error parsing number: {}", error ),
-		Ok(num) => num,
-	}
+	str.parse::<i32>().expect("Error parsing number")
 }

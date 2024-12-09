@@ -1,5 +1,4 @@
 
-use colored::Colorize;
 const INPUT: &str = include_str!("../../input/2.txt");
 /* const INPUT: &str = "7 6 4 2 1
 1 2 7 8 9
@@ -13,15 +12,18 @@ pub fn go()
 	println!("Day 2");
 	// The input is split, by line, into reports
 	let reports: Vec<String> = INPUT.lines().map( std::string::ToString::to_string ).collect();
+
+	let time_before = std::time::Instant::now();
+	let part_one_result = part_one(&reports);
+
+	util::print_result("Part 1", time_before.elapsed(), "The number of safe reports", &part_one_result);
+
+	println!();
 	
-	println!("\t{}\n\tThe number of safe reports: {}",
-		"Part 1".bold(),
-		part_one(&reports)
-	);
-	println!("\t{}\n\tThe number of actually safe reports: {}",
-		"Part 2".bold(),
-		part_two(&reports)
-	);
+	let time_before = std::time::Instant::now();
+	let part_two_result = part_two(&reports);
+	
+	util::print_result("Part 2", time_before.elapsed(), "The number of actually safe reports", &part_two_result);	
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
