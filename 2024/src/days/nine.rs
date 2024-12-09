@@ -1,5 +1,3 @@
-use std::fmt::Result;
-
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/9.txt");
 #[allow(unused)]
@@ -17,17 +15,15 @@ pub fn go()
 
 	let time_before = std::time::Instant::now();
 	let part_one_result = part_one();
-	let time_elapsed = time_before.elapsed();
 	
-	util::print_result("Part 1", time_elapsed, "Part 1 description", &part_one_result);
+	util::print_result("Part 1", time_before.elapsed(), "Defragged checksum", &part_one_result);
 
 	println!();
 	
 	let time_before = std::time::Instant::now();
 	let part_two_result = part_two();
-	let time_elapsed = time_before.elapsed();
 	
-	util::print_result("Part 2", time_elapsed, "Part 2 description", &part_two_result);	
+	util::print_result("Part 2", time_before.elapsed(), "Redefragged checksum", &part_two_result);	
 }
 
 fn part_one() -> ResultType
