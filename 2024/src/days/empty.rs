@@ -22,10 +22,10 @@ pub fn go()
 	println!();
 	
 	let time_before = std::time::Instant::now();
-	let part_one_result = part_two();
+	let part_two_result = part_two();
 	let time_elapsed = time_before.elapsed();
 	
-	util::print_result("Part 2", time_elapsed, "Part 2 description", &part_one_result);	
+	util::print_result("Part 2", time_elapsed, "Part 2 description", &part_two_result);	
 }
 
 fn part_one() -> ResultType

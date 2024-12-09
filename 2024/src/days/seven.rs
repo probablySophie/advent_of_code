@@ -30,9 +30,9 @@ pub fn go()
 	println!();
 	
 	let time_before = std::time::Instant::now();
-	let part_one_result = part_two(&equations);
+	let part_two_result = part_two(&equations);
 	let time_elapsed = time_before.elapsed();
-	util::print_result("Part 2", time_elapsed, "Total result with new operator", &part_one_result);
+	util::print_result("Part 2", time_elapsed, "Total result with new operator", &part_two_result);
 }
 
 /// See if the total can be made using the arguments using only `*` and `+`

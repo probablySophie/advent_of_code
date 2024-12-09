@@ -58,3 +58,92 @@ pub fn str_lines_i32s(str: &str) -> Result<Vec<Vec<i32>>, String>
 
 	Ok(line_numbers)
 }
+
+pub type CharMap = Vec<Vec<char>>;
+pub type MapLoc = (usize, usize);
+
+#[must_use]
+/// Reads a set of input lines as an `&str` into a `Vec<Vec<char>>`
+/// e.g.
+/// `...0` →  `[ ['.', '.', '.', '0'], `
+/// `.1..` →  `  ['.', '1', '.', '.'],`
+/// `..3.` →  `  ['.', '.', '3', '.'] ]`
+pub fn read_char_map(input: &str) -> CharMap
+{
+	let mut vec = Vec::new();
+	for line in input.lines()
+	{
+		vec.push( line.chars().collect::<Vec<char>>() );
+	}
+
+	vec
+}
+/// Print a `util::CharMap` nicely onto the screen :)
+pub fn print_map(map: &CharMap)
+{
+	for line in map
+	{
+		for c in line
+		{
+			print!("{c}");
+		}
+		println!();
+	}
+}
+
+pub trait LocationDiff {
+	fn get_new_location(&self, start_location: MapLoc, change: (i32, i32)) -> Option<MapLoc>;
+}
+#[allow(clippy::cast_sign_loss)]
+impl LocationDiff for CharMap
+{
+	fn get_new_location(&self, start_location: MapLoc, change: (i32, i32)) -> Option<MapLoc>
+	{
+		Some((
+		if change.0 < 0
+		{
+			// Sub X
+			match start_location.0.checked_sub( change.0.unsigned_abs() as usize )
+			{
+				None => return None,
+				Some(v) => v,
+			}
+		}
+		else
+		{
+			// Add X
+			match start_location.0.checked_add( change.0.unsigned_abs() as usize )
+			{
+				None => return None,
+				Some(v) => 
+				{
+					if v >= self[0].len() {return None}
+					v
+				}
+			}
+		},
+		if change.1 < 0
+		{
+			// Sub Y
+			match start_location.1.checked_sub( change.1.unsigned_abs() as usize )
+			{
+				None => return None,
+				Some(v) => v,
+			}
+		}
+		else
+		{
+			// Add Y
+			match start_location.1.checked_add( change.1.unsigned_abs() as usize )
+			{
+				None => return None,
+				Some(v) => 
+				{
+					if v >= self.len() {return None}
+					v
+				}
+			}
+		}
+		))
+	}
+}

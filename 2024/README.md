@@ -9,7 +9,7 @@ This is a big Repo with multiple years, so you'll need to go into the year's fol
 
 ****
 
-Total ⭐: 14/50  
+Total ⭐: 18/50  
 
 Day &emsp14;1: ⭐⭐  
 Day &emsp14;2: ⭐⭐  
@@ -18,8 +18,8 @@ Day &emsp14;4: ⭐⭐
 Day &emsp14;5: ⭐⭐  
 Day &emsp14;6: ⭐⭐  
 Day &emsp14;7: ⭐⭐  
-Day &emsp14;8:  
-Day &emsp14;9:  
+Day &emsp14;8: ⭐⭐  
+Day &emsp14;9: ⭐⭐  
 Day 10:  
 Day 11:  
 Day 12:  
