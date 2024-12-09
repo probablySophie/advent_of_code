@@ -1,4 +1,4 @@
-use util::{print_map, CharMap, LocationDiff};
+use util::{CharMap, LocationDiff};
 
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/8.txt");
