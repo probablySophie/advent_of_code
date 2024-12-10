@@ -65,5 +65,4 @@ Day 25:
 
 ### TODO:
 
-* Day 6 part 2 is *slow* and could be fixed up with a point map
-* Day 7 part 2 is *slow*
+* Get everyone's part 1 & 2 below 200ms
