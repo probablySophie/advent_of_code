@@ -13,8 +13,9 @@ printf "\t$txt_file\n\n"
 
 if [[ -e "$rs_file" ]]; then
 	printf "That day already exists!\n"
+	return
 else
-	printf "That day does not exist!\n"
+	printf "That day does not exist!\nMaking it now!\n"
 fi
 
 cp src/days/empty.rs $rs_file

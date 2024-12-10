@@ -13,24 +13,30 @@ macro_rules! MatchAndTimeTable {
         	$($matching => {let _ = days::$day::go(true);})+,
         	"times" => {
         		println!("Getting times, this will take a moment or two...");
-        		let time_sets = vec![
-	        		$(
-	        			($matching, days::$day::go(false)),
-	        		)+
-        		];
-        		println!();
         		let mut table_widths = [4, 8, 6, 6];
+        		let mut time_sets: Vec<[String; 4]> = Vec::new();
+        		{
+	        		$(
+	        			let times = days::$day::go(false);
+						time_sets.push([
+							$matching.to_string(),
+							format_and_mark(times.0),
+							format_and_mark(times.1),
+							format_and_mark(times.2),
+						]);
+	        		)+
+	        	}
+        		println!();
         		for time_set in &time_sets
         		{
-        			let l1 = time_set.0.chars().count();
-        			let l2 = format!("{:.2?}", time_set.1.0).chars().count();
-        			let l3 = format!("{:.2?}", time_set.1.1).chars().count();
-        			let l4 = format!("{:.2?}", time_set.1.2).chars().count();
-
-        			if l1 > table_widths[0] { table_widths[0] = l1 + 3 };
-        			if l2 > table_widths[1] { table_widths[1] = l2 + 3 };
-        			if l3 > table_widths[2] { table_widths[2] = l3 + 3 };
-        			if l4 > table_widths[3] { table_widths[3] = l4 + 3 };
+        			for i in 0..table_widths.len()
+        			{
+        				let len = time_set[i].chars().count();
+        				if table_widths[i] < len
+        				{ 
+        					table_widths[i] = len
+        				}
+        			}
         		}
         		println!("| {} | {} | {} | {} |",
         			String::from("Day")      + &(" ".repeat(table_widths[0] - 3)),
@@ -46,15 +52,11 @@ macro_rules! MatchAndTimeTable {
         		);
         		for time_set in time_sets
         		{
-        			let s1 = time_set.0.to_owned();
-        			let s2 = format_and_mark(time_set.1.0);
-        			let s3 = format_and_mark(time_set.1.1);
-        			let s4 = format_and_mark(time_set.1.2);
         			println!("| {} | {} | {} | {} |", 
-        				s1.clone() + &(" ".repeat(table_widths[0] - s1.chars().count())), 
-        				s2.clone() + &(" ".repeat(table_widths[1] - s2.chars().count())), 
-        				s3.clone() + &(" ".repeat(table_widths[2] - s3.chars().count())), 
-        				s4.clone() + &(" ".repeat(table_widths[3] - s4.chars().count()))
+        				time_set[0].clone() + &(" ".repeat(table_widths[0] - time_set[0].chars().count())), 
+        				time_set[1].clone() + &(" ".repeat(table_widths[1] - time_set[1].chars().count())), 
+        				time_set[2].clone() + &(" ".repeat(table_widths[2] - time_set[2].chars().count())), 
+        				time_set[3].clone() + &(" ".repeat(table_widths[3] - time_set[3].chars().count()))
         			);
         			// TODO: Highlight any numbers above 200 ms as needing improvement
         			// TODO: Put backticks around it `NUM`
@@ -70,7 +72,7 @@ fn format_and_mark(duration: Duration) -> String
 {
 	let time_str = format!("{duration:.2?}");
 	if duration > WARNING_LEVEL {
-		return String::from("'") + &time_str + "'"
+		return String::from("`") + &time_str + "`"
 	}
 	// Else
 	time_str
@@ -110,7 +112,7 @@ fn main()
 		"7", seven,
 		"8", eight,
 		"9", nine,
-		// "10", ten,
+		"10", ten,
 		// "11", eleven,
 		// "12", twelve,
 		// "13", thirteen,
