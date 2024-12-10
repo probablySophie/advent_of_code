@@ -13,16 +13,20 @@ macro_rules! MatchAndTimeTable {
         	$($matching => {let _ = days::$day::go(true);})+,
         	"times" => {
         		println!("Getting times, this will take a moment or two...");
-        		let mut table_widths = [4, 8, 6, 6];
-        		let mut time_sets: Vec<[String; 4]> = Vec::new();
+        		let mut table_widths = [4, 8, 6, 6, 5];
+        		let mut time_sets: Vec<[String; 5]> = Vec::new();
+        		let mut running_total = Duration::new(0, 0);
         		{
 	        		$(
 	        			let times = days::$day::go(false);
+	        			let total = times.0 + times.1 + times.2;
+	        			running_total += total;
 						time_sets.push([
 							$matching.to_string(),
 							format_and_mark(times.0),
 							format_and_mark(times.1),
 							format_and_mark(times.2),
+							format_and_mark(total),
 						]);
 	        		)+
 	        	}
@@ -38,29 +42,28 @@ macro_rules! MatchAndTimeTable {
         				}
         			}
         		}
-        		println!("| {} | {} | {} | {} |",
+        		println!("| {} | {} | {} | {} | {} |",
         			String::from("Day")      + &(" ".repeat(table_widths[0] - 3)),
         			String::from("Pre-Calc") + &(" ".repeat(table_widths[1] - 8)),
         			String::from("Part 1")   + &(" ".repeat(table_widths[2] - 6)),
-        			String::from("Part 2")   + &(" ".repeat(table_widths[3] - 6))
+        			String::from("Part 2")   + &(" ".repeat(table_widths[3] - 6)),
+        			String::from("Total")    + &(" ".repeat(table_widths[4] - 5)),
         		);
-        		println!("| :{}: | :{}: | :{}: | :{}: |",
-        			"-".repeat(table_widths[0]-2),
-        			"-".repeat(table_widths[1]-2),
-        			"-".repeat(table_widths[2]-2),
-        			"-".repeat(table_widths[3]-2),
-        		);
+        		for i in 0..table_widths.len()
+        		{
+        			print!("| :{}: ", "-".repeat(table_widths[i]-2));
+        		}
+        		println!("|");
         		for time_set in time_sets
         		{
-        			println!("| {} | {} | {} | {} |", 
-        				time_set[0].clone() + &(" ".repeat(table_widths[0] - time_set[0].chars().count())), 
-        				time_set[1].clone() + &(" ".repeat(table_widths[1] - time_set[1].chars().count())), 
-        				time_set[2].clone() + &(" ".repeat(table_widths[2] - time_set[2].chars().count())), 
-        				time_set[3].clone() + &(" ".repeat(table_widths[3] - time_set[3].chars().count()))
-        			);
-        			// TODO: Highlight any numbers above 200 ms as needing improvement
-        			// TODO: Put backticks around it `NUM`
+        			for i in 0..table_widths.len()
+        			{
+        				let space = table_widths[i] - time_set[i].chars().count();
+        				print!("| {} ", time_set[i].clone() + &(" ".repeat(space)));
+        			}
+        			println!("|");
         		}
+        		println!("\n*Entire runtime: {:.2?}*", running_total);
         	},
         	_ => println!("{}: {}", "Unrecognised input".yellow(), $input.yellow()),
         }
