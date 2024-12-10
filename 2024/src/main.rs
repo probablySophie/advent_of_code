@@ -1,5 +1,5 @@
 use colored::Colorize;
-use std::fmt::Debug;
+use std::{fmt::Debug, time::Duration};
 
 mod days;
 
@@ -27,10 +27,10 @@ macro_rules! MatchAndTimeTable {
         			let l3 = format!("{:.2?}", time_set.1.1).chars().count();
         			let l4 = format!("{:.2?}", time_set.1.2).chars().count();
 
-        			if l1 > table_widths[0] { table_widths[0] = l1 + 1 };
-        			if l2 > table_widths[1] { table_widths[1] = l2 + 1 };
-        			if l3 > table_widths[2] { table_widths[2] = l3 + 1 };
-        			if l4 > table_widths[3] { table_widths[3] = l4 + 1 };
+        			if l1 > table_widths[0] { table_widths[0] = l1 + 3 };
+        			if l2 > table_widths[1] { table_widths[1] = l2 + 3 };
+        			if l3 > table_widths[2] { table_widths[2] = l3 + 3 };
+        			if l4 > table_widths[3] { table_widths[3] = l4 + 3 };
         		}
         		println!("| {} | {} | {} | {} |",
         			String::from("Day")      + &(" ".repeat(table_widths[0] - 3)),
@@ -47,21 +47,33 @@ macro_rules! MatchAndTimeTable {
         		for time_set in time_sets
         		{
         			let s1 = time_set.0.to_owned();
-        			let s2 = format!("{:.2?}", time_set.1.0);
-        			let s3 = format!("{:.2?}", time_set.1.1);
-        			let s4 = format!("{:.2?}", time_set.1.2);
+        			let s2 = format_and_mark(time_set.1.0);
+        			let s3 = format_and_mark(time_set.1.1);
+        			let s4 = format_and_mark(time_set.1.2);
         			println!("| {} | {} | {} | {} |", 
         				s1.clone() + &(" ".repeat(table_widths[0] - s1.chars().count())), 
         				s2.clone() + &(" ".repeat(table_widths[1] - s2.chars().count())), 
         				s3.clone() + &(" ".repeat(table_widths[2] - s3.chars().count())), 
         				s4.clone() + &(" ".repeat(table_widths[3] - s4.chars().count()))
         			);
+        			// TODO: Highlight any numbers above 200 ms as needing improvement
+        			// TODO: Put backticks around it `NUM`
         		}
         	},
         	_ => println!("{}: {}", "Unrecognised input".yellow(), $input.yellow()),
         }
-		// TODO: Make a table with all of the times!
     };
+}
+
+const WARNING_LEVEL: Duration = Duration::new(0, 200_000_000);
+fn format_and_mark(duration: Duration) -> String
+{
+	let time_str = format!("{duration:.2?}");
+	if duration > WARNING_LEVEL {
+		return String::from("'") + &time_str + "'"
+	}
+	// Else
+	time_str
 }
 
 fn main()
