@@ -63,7 +63,7 @@ macro_rules! MatchAndTimeTable {
         			}
         			println!("|");
         		}
-        		println!("\n*Entire runtime: {:.2?}*", running_total);
+        		println!("\n**Entire runtime: {:.2?}**", running_total);
         	},
         	_ => println!("{}: {}", "Unrecognised input".yellow(), $input.yellow()),
         }
