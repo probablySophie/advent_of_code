@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/7.txt");
 #[allow(unused)]
@@ -15,25 +17,36 @@ const EXAMPLE_INPUT_2: &str = "";
 
 type ResultType = i64;
 
-// https://adventofcode.com/2024/day/7
-pub fn go()
+//https://adventofcode.com/2024/day/7
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day 7");
-	let equations = parse_input(INPUT);
-	// let equations = parse_input(EXAMPLE_INPUT_1);
-
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one(&equations);
-	let time_elapsed = time_before.elapsed();
-	util::print_result("Part 1", time_elapsed, "Total calibration result", &part_one_result);
-
-	println!();
 	
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two(&equations);
-	let time_elapsed = time_before.elapsed();
-	util::print_result("Part 2", time_elapsed, "Total result with new operator", &part_two_result);
+	let time_before = Instant::now();
+	
+	let equations = parse_input(INPUT);
+
+	let pre_calc_time = time_before.elapsed();
+
+	TimedRun!(time_before, part_one_result, part_one(&equations), part_one_time);
+
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "Total calibration result", &part_one_result);
+	}
+	
+	TimedRun!(time_before, part_two_result, part_two(&equations), part_two_time);
+	
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "Total result with new operator", &part_two_result);
+	}
+
+	// Return how long it took!
+	(pre_calc_time, part_one_time, part_two_time)	
 }
+
 
 /// See if the total can be made using the arguments using only `*` and `+`
 /// Return the sum of the totals that *can* be made in this way

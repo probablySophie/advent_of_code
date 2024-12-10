@@ -1,4 +1,4 @@
-use colored::Colorize;
+use std::time::{Duration, Instant};
 
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/6.txt");
@@ -16,25 +16,41 @@ const EXAMPLE_INPUT_1: &str = "....#.....
 #[allow(unused)]
 const EXAMPLE_INPUT_2: &str = "";
 
-// https://adventofcode.com/2024/day/6
-
-pub fn go()
+//https://adventofcode.com/2024/day/6
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day 6");
+	
+	let time_before = Instant::now();
+	
 	let map = make_map(INPUT);
 	// let map = make_map(EXAMPLE_INPUT_1);
 
-	println!("Map Size: {}x{}", map[0].len(), map.len());
+	if print_results
+	{
+		println!("Map Size: {}x{}", map[0].len(), map.len());
 
-	println!("\t{}\n\tTotal unique positions: {}",
-		"Part 1".bold(),
-		part_one(&mut map.clone())
-	);
+	}
 	
-	println!("\t{}\n\tNumber of loop-causing positions: {}",
-		"Part 2".bold(),
-		part_two(&mut map.clone())
-	);
+	let pre_calc_time = time_before.elapsed();
+
+	TimedRun!(time_before, part_one_result, part_one(&mut map.clone()), part_one_time);
+
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "Total unique positions", &part_one_result);
+	}
+	
+	TimedRun!(time_before, part_two_result, part_two(&mut map.clone()), part_two_time);
+	
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "Number of unique loop-causing positions", &part_two_result);
+	}
+
+	// Return how long it took!
+	(pre_calc_time, part_one_time, part_two_time)	
 }
 
 type LevelMap = Vec<Vec<char>>;
@@ -78,7 +94,16 @@ fn part_two(map: &mut LevelMap) -> i32
 	// Work out everywhere that adding a single new obstical would cause a loop
 	// But it can't be the guard's starting space
 
-	let mut loop_spots = Vec::new();
+	// TODO: Make a point cloud - points are obstacles & know where the next obstacle is relative to them
+	// points = Vec<Point>
+	// point_map = Vec<Vec<Option<usize>>> - points to the Points
+	// valid_obstacles = Vec<Vec<Option<bool>>> - if we've tried here before
+
+	// For the loop checking, instead of iterating through each position on the map
+	// Go from point to point - should be considerably faster!
+
+	let mut checked_obstacles: Vec<Vec<Option<bool>>> = vec![ vec![ None; map[0].len() ]; map.len() ];
+	let mut obstacle_counter = 0;
 	
 	let Some(starting_location) = get_guard_loc(map)
 	else { return -1 };
@@ -102,19 +127,18 @@ fn part_two(map: &mut LevelMap) -> i32
 			continue;
 		}
 		// Now check if adding an obstical infront of the guard would cause a loop
-		if new_pos != starting_location && is_loop(map, new_pos) {
-			let mut found = false;
-			for ls in &loop_spots { if ls == &new_pos { found = true } };
-			if !found
-			{
-				loop_spots.push( new_pos );
-			}
+		if checked_obstacles[new_pos.1][new_pos.0].is_none()
+		&& new_pos != starting_location
+		{
+			let result = is_loop(map, new_pos);
+			checked_obstacles[new_pos.1][new_pos.0] = Some( result );
+			if result { obstacle_counter += 1; }
 		}
 		// Update the guard's location
 		guard_location = new_pos;
 	}
-	
-	loop_spots.len().try_into().unwrap()
+
+	obstacle_counter
 }
 
 fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool

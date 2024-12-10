@@ -1,4 +1,4 @@
-use colored::Colorize;
+use std::time::{Duration, Instant};
 
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/4.txt");
@@ -37,10 +37,13 @@ const DIRECTIONS: [(i32, i32); 8] = [
 	(-1, -1), // left down
 ];
 
-pub fn go()
+//https://adventofcode.com/2024/day/4
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day 4");
 	
+	let time_before = Instant::now();
+
 	let mut grid = Vec::new();
 	for line in INPUT.lines()
 	// for line in EXAMPLE_INPUT_1.lines()
@@ -49,18 +52,27 @@ pub fn go()
 		grid.push( line.chars().collect() );
 	}
 
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one(&grid);
-	
-	util::print_result("Part 1", time_before.elapsed(), "The number of times 'XMAS' appears is", &part_one_result);
+	let pre_calc_time = time_before.elapsed();
 
-	println!();
+	TimedRun!(time_before, part_one_result, part_one(&grid), part_one_time);
+
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "Times 'XMAS' appears", &part_one_result);
+	}
 	
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two(&grid);
+	TimedRun!(time_before, part_two_result, part_two(&grid), part_two_time);
 	
-	util::print_result("Part 2", time_before.elapsed(), "The number of times an 'X-MAS' appears is", &part_two_result);	
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "Times an 'X-MAS' appears", &part_two_result);
+	}
+
+	// Return how long it took!
+	(pre_calc_time, part_one_time, part_two_time)	
 }
+
 
 #[allow(clippy::cast_sign_loss)]
 /// Check if a space in a given direction is safe to look at

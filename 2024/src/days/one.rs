@@ -1,3 +1,4 @@
+use std::time::{Duration, Instant};
 
 // https://adventofcode.com/2024/day/1
 // Take two lists of numbers
@@ -8,20 +9,35 @@
 
 const INPUT: &str = include_str!("../../input/1.txt");
 
-pub fn go()
+//https://adventofcode.com/2024/day/1
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	println!("Day 1:");
-
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one();
-
-	util::print_result("Part 1", time_before.elapsed(), "The total distance is", &part_one_result);
-
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two();
+	println!("Day 1");
 	
-	util::print_result("Part 2", time_before.elapsed(), "The similarity score is", &part_two_result);
+	let time_before = Instant::now();
+	// TODO: Do any pre-calculation here
+
+	let pre_calc_time = time_before.elapsed();
+
+	TimedRun!(time_before, part_one_result, part_one(), part_one_time);
+
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "The total distance is", &part_one_result);
+	}
+	
+	TimedRun!(time_before, part_two_result, part_two(), part_two_time);
+	
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "The similarity score is", &part_two_result);
+	}
+
+	// Return how long it took!
+	(pre_calc_time, part_one_time, part_two_time)	
 }
+
 
 fn part_one() -> i32
 {

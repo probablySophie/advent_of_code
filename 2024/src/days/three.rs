@@ -1,26 +1,39 @@
+use std::time::{Duration, Instant};
 use regex::Regex;
 
 const INPUT: &str = include_str!("../../input/3.txt");
 //const SAMPLE_INPUT: &str = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
 // const SAMPLE_INPUT_2: &str = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
 
-// https://adventofcode.com/2024/day/3
-pub fn go()
+//https://adventofcode.com/2024/day/3
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day 3");
 	
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one();
-	
-	util::print_result("Part 1", time_before.elapsed(), "The multiplication total", &part_one_result);
+	let time_before = Instant::now();
+	// TODO: Do any pre-calculation here
 
-	println!();
+	let pre_calc_time = time_before.elapsed();
+
+	TimedRun!(time_before, part_one_result, part_one(), part_one_time);
+
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "The multiplication total", &part_one_result);
+	}
 	
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two();
+	TimedRun!(time_before, part_two_result, part_two(), part_two_time);
 	
-	util::print_result("Part 2", time_before.elapsed(), "The revised multiplication total", &part_two_result);	
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "The revised multiplication total", &part_two_result);
+	}
+
+	// Return how long it took!
+	(pre_calc_time, part_one_time, part_two_time)	
 }
+
 
 fn parse_mul(mul: &str) -> i32
 {

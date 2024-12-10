@@ -1,5 +1,7 @@
+use std::time::{Duration, Instant};
+
 #[allow(unused)]
-const INPUT: &str = include_str!("../../input/~DAY_NUM~.txt");
+// const INPUT: &str = include_str!("../../input/~DAY_NUM~.txt");
 #[allow(unused)]
 const EXAMPLE_INPUT_1: &str = "";
 #[allow(unused)]
@@ -9,21 +11,32 @@ const EXAMPLE_INPUT_2: &str = "";
 type ResultType = i32;
 
 //https://adventofcode.com/2024/day/~DAY_NUM~
-pub fn go()
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day ~DAY_NUM~");
+	
+	let time_before = Instant::now();
+	// TODO: Do any pre-calculation here
 
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one();
-	
-	util::print_result("Part 1", time_before.elapsed(), "Part 1 description", &part_one_result);
+	let pre_calc_time = time_before.elapsed();
 
-	println!();
+	TimedRun!(time_before, part_one_result, part_one(), part_one_time);
+
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "Part 1 description", &part_one_result);
+	}
 	
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two();
+	TimedRun!(time_before, part_two_result, part_two(), part_two_time);
 	
-	util::print_result("Part 2", time_before.elapsed(), "Part 2 description", &part_two_result);	
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "Part 2 description", &part_two_result);
+	}
+
+	// Return how long it took!
+	(pre_calc_time, part_one_time, part_two_time)	
 }
 
 fn part_one() -> ResultType

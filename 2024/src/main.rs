@@ -2,6 +2,9 @@ use colored::Colorize;
 
 mod days;
 
+#[macro_use]
+extern crate util;
+
 fn main()
 {
 	let args: Vec<String> = std::env::args().collect();
@@ -23,19 +26,22 @@ fn main()
 		util::read_line_into(input);
 	}
 
-	match input.as_str()
+	let _ = match input.as_str()
 	{
-		"1" => days::one::go(),
-		"2" => days::two::go(),
-		"3" => days::three::go(),
-		"4" => days::four::go(),
-		"5" => days::five::go(),
-		"6" => days::six::go(),
-		"7" => days::seven::go(),
-		"8" => days::eight::go(),
-		"9" => days::nine::go(),
+		"e" => days::empty::go(true),
+		"1" => days::one::go(true),
+		"2" => days::two::go(true),
+		"3" => days::three::go(true),
+		"4" => days::four::go(true),
+		"5" => days::five::go(true),
+		"6" => days::six::go(true),
+		"7" => days::seven::go(true),
+		"8" => days::eight::go(true),
+		"9" => days::nine::go(true),
 		_ => {
-			println!("{}", "Unrecognised input".yellow());
+			panic!("{}", "Unrecognised input".yellow());
 		},
-	}
+	};
+
+	// TODO: Make a table with all of the times!
 }

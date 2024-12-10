@@ -36,3 +36,13 @@ Day 22:
 Day 23:  
 Day 24:  
 Day 25:  
+
+### TODO:
+
+* A bench-marking function in each day
+	* Have it print into a pretty table!
+	* Have it highlight bad times
+	* Print into a markdown-ready table?
+* Figure out a macro that allows for just one set of calls, but that also makes the bench-marking
+* Day 6 part 2 is *slow* and could be fixed up with a point map
+* Day 7 part 2 is *slow*

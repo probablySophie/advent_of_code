@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 use colored::Colorize;
 
 pub fn read_line_into(string: &mut String) -> bool
@@ -10,6 +12,15 @@ pub fn read_line_into(string: &mut String) -> bool
     	},// do whatever you want, line is String
     	Err(_) => {false},// handle error, e is IoError
 	}
+}
+
+#[macro_export]
+macro_rules! TimedRun {
+    ($before:ident, $result:ident, $func:expr, $after:ident) => {
+        let $before = Instant::now();
+        let $result = $func;
+        let $after = $before.elapsed();
+    };
 }
 
 /// Prints a day's part's result!
@@ -91,12 +102,17 @@ pub fn print_map(map: &CharMap)
 	}
 }
 
-pub trait LocationDiff {
+pub trait MapFunction {
 	fn get_new_location(&self, start_location: MapLoc, change: (i32, i32)) -> Option<MapLoc>;
+	fn step(&self, start_location: MapLoc, direction: Direction) -> Option<MapLoc>;
+	fn at(&self, location: MapLoc) -> Option<char>;
+	fn set(&mut self, location: MapLoc, c: char) -> bool;
 }
 #[allow(clippy::cast_sign_loss)]
-impl LocationDiff for CharMap
+impl MapFunction for CharMap
 {
+	/// Get a new location relative to the previous one
+	/// Returns `None` if out of bounds on either axis
 	fn get_new_location(&self, start_location: MapLoc, change: (i32, i32)) -> Option<MapLoc>
 	{
 		Some((
@@ -146,4 +162,99 @@ impl LocationDiff for CharMap
 		}
 		))
 	}
+
+	/// Take one step from a given location in a given `Direction`
+	/// Returns None if out of bounds on either axis
+	fn step(&self, from: MapLoc, direction: Direction) -> Option<MapLoc>
+	{
+		let mut x = from.0;
+		let mut y = from.1;
+
+		// Make the move and check out of bounds top & left
+		match direction
+		{
+		    Direction::Up    => y = from.1.checked_sub(1)?,
+		    Direction::Down  => y = from.1.checked_add(1)?,
+		    Direction::Left  => x = from.0.checked_sub(1)?,
+		    Direction::Right => x = from.0.checked_add(1)?,
+		}
+		// Check out of bounds bottom & right
+		if x >= self[0].len()
+		|| y >= self.len()
+		{
+			return None
+		}
+		
+		Some((x, y))
+	}
+
+	/// Get the `char` at a given `MapLoc` location
+	fn at(&self, location: MapLoc) -> Option<char>
+	{
+		if location.0 >= self[0].len()
+		|| location.1 >= self.len()
+		{
+			return None
+		}
+		
+		Some(self[location.1][location.0])
+	}
+
+	fn set(&mut self, location: MapLoc, c: char) -> bool
+	{
+		if location.0 >= self[0].len()
+		|| location.1 >= self.len()
+		{
+			return false
+		}
+		self[location.1][location.0] = c;
+		true
+	}
+}
+
+/// The direction the guard is currently facing
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub enum Direction
+{
+	Up,
+	Down,
+	Left,
+	Right
+}
+impl Direction
+{
+	#[must_use] 
+	pub fn turn_right(self) -> Self
+	{
+		match self
+		{
+		    Direction::Up => Direction::Right,
+		    Direction::Down => Direction::Left,
+		    Direction::Left => Direction::Up,
+		    Direction::Right => Direction::Down,
+		}
+	}
+	#[must_use]
+	pub fn to_char(self) -> char
+	{
+		match self
+		{
+		    Direction::Up => '^',
+		    Direction::Down => 'v',
+		    Direction::Left => '<',
+		    Direction::Right => '>',
+		}	
+	}
+}
+
+pub fn find_in<T: std::cmp::PartialEq>(iter: &[T], item: &T) -> bool
+{
+	for i in iter
+	{
+		if item == i
+		{
+			return true
+		}
+	}
+	false
 }

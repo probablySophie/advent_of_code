@@ -1,4 +1,6 @@
-use util::{CharMap, LocationDiff};
+use std::time::{Duration, Instant};
+
+use util::{CharMap, MapFunction};
 
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/8.txt");
@@ -21,25 +23,34 @@ const EXAMPLE_INPUT_1: &str = "............
 type ResultType = i32;
 
 //https://adventofcode.com/2024/day/8
-pub fn go()
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day 8");
+
+	let time_before = Instant::now();
+	
 	let map = util::read_char_map(INPUT);
 	// let map = util::read_char_map(EXAMPLE_INPUT_1);
+	
+	let pre_calc_time = time_before.elapsed();
 
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one(&map);
-	let time_elapsed = time_before.elapsed();
-	
-	util::print_result("Part 1", time_elapsed, "Num Unique Antinode Locations", &part_one_result);
+	TimedRun!(time_before, part_one_result, part_one(&map), part_one_time);
 
-	println!();
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "Num Unique Antinode Locations", &part_one_result);
+	}
+
 	
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two(&map);
-	let time_elapsed = time_before.elapsed();
+	TimedRun!(time_before, part_two_result, part_two(&map), part_two_time);
+
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "Num Unique repeated antinode locations", &part_two_result);	
+	}	
 	
-	util::print_result("Part 2", time_elapsed, "Part 2 description", &part_two_result);	
+	(pre_calc_time, part_one_time, part_two_time)
 }
 
 fn part_one(map: &CharMap) -> ResultType

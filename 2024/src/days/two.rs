@@ -1,3 +1,4 @@
+use std::time::{Duration, Instant};
 
 const INPUT: &str = include_str!("../../input/2.txt");
 /* const INPUT: &str = "7 6 4 2 1
@@ -7,24 +8,36 @@ const INPUT: &str = include_str!("../../input/2.txt");
 8 6 4 4 1
 1 3 6 7 9"; */
 
-pub fn go()
+//https://adventofcode.com/2024/day/2
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day 2");
-	// The input is split, by line, into reports
+	
+	let time_before = Instant::now();
+	
 	let reports: Vec<String> = INPUT.lines().map( std::string::ToString::to_string ).collect();
 
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one(&reports);
+	let pre_calc_time = time_before.elapsed();
 
-	util::print_result("Part 1", time_before.elapsed(), "The number of safe reports", &part_one_result);
+	TimedRun!(time_before, part_one_result, part_one(&reports), part_one_time);
 
-	println!();
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "The number of safe reports", &part_one_result);
+	}
 	
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two(&reports);
+	TimedRun!(time_before, part_two_result, part_two(&reports), part_two_time);
 	
-	util::print_result("Part 2", time_before.elapsed(), "The number of actually safe reports", &part_two_result);	
+	if print_results
+	{
+		println!();
+		util::print_result("Part 2", part_two_time, "The number of actually safe reports", &part_two_result);
+	}
+
+	// Return how long it took!
+	(pre_calc_time, part_one_time, part_two_time)	
 }
+
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 enum Direction

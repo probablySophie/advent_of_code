@@ -1,4 +1,4 @@
-use colored::Colorize;
+use std::time::{Duration, Instant};
 
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/5.txt");
@@ -31,24 +31,32 @@ const EXAMPLE_INPUT_1: &str = "47|53
 75,97,47,61,53
 61,13,29
 97,13,75,29,47";
-#[allow(unused)]
-const EXAMPLE_INPUT_2: &str = "";
-pub fn go()
+
+
+pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
 	println!("Day 5");
+	
+	let time_before = Instant::now();
 	let (page_order_pairs, update_sets) = parse_input(INPUT);
+	let pre_calc_time = time_before.elapsed();
 
-	let time_before = std::time::Instant::now();
-	let part_one_result = part_one(&page_order_pairs, &update_sets);
-	
-	util::print_result("Part 1", time_before.elapsed(), "The correctly ordered sum is", &part_one_result);
+	TimedRun!(time_before, part_one_result, part_one(&page_order_pairs, &update_sets), part_one_time);
 
-	println!();
+	if print_results
+	{
+		util::print_result("Part 1", part_one_time, "The correctly ordered sum is", &part_one_result);
+	}
 	
-	let time_before = std::time::Instant::now();
-	let part_two_result = part_two(&page_order_pairs, &update_sets);
+	TimedRun!(time_before, part_two_result, part_two(&page_order_pairs, &update_sets), part_two_time);
+
+	if print_results
+	{		
+		println!();
+		util::print_result("Part 2", part_two_time, "The incorrectly ordered sum is", &part_two_result);
+	}
 	
-	util::print_result("Part 2", time_before.elapsed(), "The incorrectly ordered sum is", &part_two_result);	
+	(pre_calc_time, part_one_time, part_two_time)	
 }
 
 
