@@ -1,5 +1,3 @@
-use std::ops::Sub;
-
 use colored::Colorize;
 
 pub fn read_line_into(string: &mut String) -> bool

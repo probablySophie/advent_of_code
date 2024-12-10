@@ -13,7 +13,7 @@ type ResultType = i64;
 //https://adventofcode.com/2024/day/9
 pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	println!("Day 9");
+	if print_results {println!("Day 9");}
 	
 	let time_before = Instant::now();
 	// TODO: Do any pre-calculation here

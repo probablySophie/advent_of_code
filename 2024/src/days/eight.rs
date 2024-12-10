@@ -25,7 +25,7 @@ type ResultType = i32;
 //https://adventofcode.com/2024/day/8
 pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	println!("Day 8");
+	if print_results {println!("Day 8");}
 
 	let time_before = Instant::now();
 	

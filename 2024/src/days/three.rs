@@ -8,7 +8,7 @@ const INPUT: &str = include_str!("../../input/3.txt");
 //https://adventofcode.com/2024/day/3
 pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	println!("Day 3");
+	if print_results {println!("Day 3");}
 	
 	let time_before = Instant::now();
 	// TODO: Do any pre-calculation here

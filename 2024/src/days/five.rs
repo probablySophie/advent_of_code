@@ -35,7 +35,7 @@ const EXAMPLE_INPUT_1: &str = "47|53
 
 pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	println!("Day 5");
+	if print_results {println!("Day 5");}
 	
 	let time_before = Instant::now();
 	let (page_order_pairs, update_sets) = parse_input(INPUT);

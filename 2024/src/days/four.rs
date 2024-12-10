@@ -40,7 +40,7 @@ const DIRECTIONS: [(i32, i32); 8] = [
 //https://adventofcode.com/2024/day/4
 pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	println!("Day 4");
+	if print_results {println!("Day 4");}
 	
 	let time_before = Instant::now();
 

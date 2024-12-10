@@ -19,7 +19,7 @@ const EXAMPLE_INPUT_2: &str = "";
 //https://adventofcode.com/2024/day/6
 pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	println!("Day 6");
+	if print_results {println!("Day 6");}
 	
 	let time_before = Instant::now();
 	
