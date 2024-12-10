@@ -60,7 +60,7 @@ Day 25:
 *Entire runtime: 4.64s*
 
 *Day `e` is an empty day for cloning into more days*  
-*Pre-Calc is any code that is run before part 1 & 2 are run - generally input parsing*
+*Pre-Calc is any code that is run before part 1 & 2 are run - generally input parsing*  
 ***All of these times are single-run times (not multi-run averages), so they will differ slightly from test to test***
 
 ### TODO:
