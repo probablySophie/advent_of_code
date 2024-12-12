@@ -28,7 +28,7 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 
 	if print_results
 	{
-		util::print_result("Part 1", part_one_time, "Part 1 description", &part_one_result);
+		util::print_result("Part 1", part_one_time, "Num stones after 25 blinks", &part_one_result);
 	}
 
 	// Part 2
@@ -37,7 +37,7 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	if print_results
 	{
 		println!();
-		util::print_result("Part 2", part_two_time, "Part 2 description", &part_two_result);
+		util::print_result("Part 2", part_two_time, "Num stones after 75 blinks", &part_two_result);
 	}
 
 	// Return how long it took!
@@ -58,10 +58,9 @@ struct Stone
 
 // Just doing part_one 75 times ends up with so many stones that my laptop crashes :(
 // Also around iteration 35 it starts to take over a second per blink
-#[allow(clippy::manual_saturating_arithmetic)]
-#[allow(clippy::too_many_lines)]
 fn part_two(input_stones: &[ResultType]) -> ResultType
 {
+	// INFO: Slightly cheated and read that someone else did the map vs full array & stole their idea
 	let print = false;
 	let mut stones: Vec<Stone> = Vec::new();
 	// Remove any duplicates - not that there actually are any in my input :/
@@ -78,6 +77,7 @@ fn part_two(input_stones: &[ResultType]) -> ResultType
 		// If we're here, then it's a fancy new guy
 		stones.push(Stone { count: 1, value: *input_stone });
 	}
+	
 	for i in 0..75
 	{
 		let time = Instant::now();
@@ -89,7 +89,7 @@ fn part_two(input_stones: &[ResultType]) -> ResultType
 			if stone.value == 0
 			{
 				stone.value = 1;
-				new_stones.push(stone);
+				insert_or_add(&mut new_stones, stone);
 				continue;
 			}
 
@@ -121,7 +121,7 @@ fn part_two(input_stones: &[ResultType]) -> ResultType
 		}
 		stones = new_stones;
 
-		if print {println!("{i} {:.2?}", time.elapsed());}
+		if print {println!("{i} {:.2?} {}", time.elapsed(), stones.len());}
 	}
 
 	let mut count = 0;
@@ -132,6 +132,7 @@ fn part_two(input_stones: &[ResultType]) -> ResultType
 	count
 }
 
+#[allow(clippy::needless_range_loop)]
 fn insert_or_add(stones: &mut Vec<Stone>, new_stone: Stone)
 {
 	for i in 0..stones.len()
@@ -139,6 +140,12 @@ fn insert_or_add(stones: &mut Vec<Stone>, new_stone: Stone)
 		if stones[i].value == new_stone.value
 		{
 			stones[i].count += new_stone.count;
+			return
+		}
+		if stones[i].value > new_stone.value
+		{
+			// INFO: This shaves almost a whole second off of the run time
+			stones.insert(i, new_stone);
 			return
 		}
 	}
@@ -204,7 +211,6 @@ fn halves(value: ResultType) -> Option<(ResultType, ResultType)>
 	{
 		return None;
 	}
-		
     // The left half of the digits are engraved on the new left stone
     // The right half of the digits are engraved on the new right stone
 	let half = (10 as ResultType).pow( len / 2 );
