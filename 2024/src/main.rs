@@ -1,5 +1,6 @@
 use colored::Colorize;
 use std::time::Duration;
+use std::io::Write;
 
 mod days;
 
@@ -28,9 +29,13 @@ macro_rules! MatchAndTimeTable {
 							format_and_mark(times.2),
 							format_and_mark(total),
 						]);
+						// Some user feedback so we know it's doing something
+						print!("{} ", $matching);
+						// And flush because otherwise the print isn't displayed
+						std::io::stdout().flush().unwrap();
 	        		)+
 	        	}
-        		println!();
+        		println!("\n");
         		for time_set in &time_sets
         		{
         			for i in 0..table_widths.len()
@@ -117,7 +122,7 @@ fn main()
 		"9", nine,
 		"10", ten,
 		"11", eleven,
-		// "12", twelve,
+		"12", twelve,
 		// "13", thirteen,
 		// "14", fourteen,
 		// "15", fifteen,
