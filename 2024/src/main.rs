@@ -1,5 +1,5 @@
 use colored::Colorize;
-use std::{fmt::Debug, time::Duration};
+use std::time::Duration;
 
 mod days;
 
@@ -116,7 +116,7 @@ fn main()
 		"8", eight,
 		"9", nine,
 		"10", ten,
-		// "11", eleven,
+		"11", eleven,
 		// "12", twelve,
 		// "13", thirteen,
 		// "14", fourteen,

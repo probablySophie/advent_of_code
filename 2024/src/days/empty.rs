@@ -16,17 +16,22 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	if print_results {println!("Day ~DAY_NUM~");}
 	
 	let time_before = Instant::now();
+	// ~ ~ ~ ~ ~ PRE CALCULATION ~ ~ ~ ~ ~
+	
 	// TODO: Do any pre-calculation here
 
+	// ~ ~ ~ ~ ~ END OF PRE CALCULATION ~ ~ ~ ~ ~
 	let pre_calc_time = time_before.elapsed();
 
+	// Part 1
 	TimedRun!(time_before, part_one_result, part_one(), part_one_time);
 
 	if print_results
 	{
 		util::print_result("Part 1", part_one_time, "Part 1 description", &part_one_result);
 	}
-	
+
+	// Part 2
 	TimedRun!(time_before, part_two_result, part_two(), part_two_time);
 	
 	if print_results
