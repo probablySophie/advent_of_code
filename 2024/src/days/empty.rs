@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-#[allow(unused)]
+// #[allow(unused)]
 // const INPUT: &str = include_str!("../../input/~DAY_NUM~.txt");
 #[allow(unused)]
 const EXAMPLE_INPUT_1: &str = "";
@@ -18,6 +18,7 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	let time_before = Instant::now();
 	// ~ ~ ~ ~ ~ PRE CALCULATION ~ ~ ~ ~ ~
 	
+	// TODO: WARN: Remember to un-comment today's line in ../main.rs
 	// TODO: Do any pre-calculation here
 
 	// ~ ~ ~ ~ ~ END OF PRE CALCULATION ~ ~ ~ ~ ~
