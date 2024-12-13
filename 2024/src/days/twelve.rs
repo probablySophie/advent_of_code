@@ -134,7 +134,7 @@ fn part_two(region_map: &[Region]) -> ResultType
 	// let debug = true;
 	let debug = false;
 	// Work out the total number of continuous sides per region * multiply it by the area
-	for (i, region) in region_map.iter().enumerate()
+	for region in region_map
 	{
 		let mut num_sides = 0;
 
