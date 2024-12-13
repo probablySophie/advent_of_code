@@ -23,3 +23,9 @@ sed -i "s/~DAY_NUM~/${day_num-1}/g" $rs_file
 touch $txt_file
 
 printf "\npub mod ${day_text[$day_num-1]};" >> src/days/mod.rs
+
+printf "Open created files? [y/n]\n(n) > "
+read answer
+if [[ "$answer" == y* ]]; then
+	$EDITOR "$rs_file" "$txt_file"
+fi
