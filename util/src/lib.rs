@@ -68,7 +68,7 @@ pub fn str_lines_i32s(str: &str) -> Result<Vec<Vec<i32>>, String>
 	Ok(line_numbers)
 }
 
-pub type CharMap = Vec<Vec<char>>;
+pub type VecMap<T> = Vec<Vec<T>>;
 pub type MapLoc = (usize, usize);
 
 #[must_use]
@@ -77,18 +77,20 @@ pub type MapLoc = (usize, usize);
 /// `...0` →  `[ ['.', '.', '.', '0'], `
 /// `.1..` →  `  ['.', '1', '.', '.'],`
 /// `..3.` →  `  ['.', '.', '3', '.'] ]`
-pub fn read_char_map(input: &str) -> CharMap
+pub fn read_char_map(input: &str) -> VecMap<char>
 {
 	let mut vec = Vec::new();
 	for line in input.lines()
 	{
+		if line.is_empty() { continue }
 		vec.push( line.chars().collect::<Vec<char>>() );
 	}
 
 	vec
 }
 /// Print a `util::CharMap` nicely onto the screen :)
-pub fn print_map(map: &CharMap)
+pub fn print_map<T>(map: &Vec<Vec<T>>)
+where T: std::fmt::Display
 {
 	for line in map
 	{
@@ -100,65 +102,46 @@ pub fn print_map(map: &CharMap)
 	}
 }
 
-pub trait MapFunction {
+pub trait MapFunction<T> {
 	fn get_new_location(&self, start_location: MapLoc, change: (i32, i32)) -> Option<MapLoc>;
 	fn step(&self, start_location: MapLoc, direction: Direction) -> Option<MapLoc>;
-	fn at(&self, location: MapLoc) -> Option<char>;
-	fn set(&mut self, location: MapLoc, c: char) -> bool;
+	fn at(&self, location: MapLoc) -> Option<T>;
+	fn set(&mut self, location: MapLoc, c: T) -> bool;
+	/// Returns the FIRST occurance of a given item
+	fn find(&self, item: T) -> Option<MapLoc>;
 }
-#[allow(clippy::cast_sign_loss)]
-impl MapFunction for CharMap
+#[allow(clippy::cast_sign_loss, clippy::manual_let_else)]
+impl<T: Copy + PartialEq> MapFunction<T> for VecMap<T>
 {
-	/// Get a new location relative to the previous one
+	/// Get a new location relative to the previous one ( can be more than 1 )
 	/// Returns `None` if out of bounds on either axis
 	fn get_new_location(&self, start_location: MapLoc, change: (i32, i32)) -> Option<MapLoc>
 	{
-		Some((
-		if change.0 < 0
+		let x = if let (true,  Some(v), _) |
+			(false, _, Some(v)) = (
+			change.0 < 0,
+			start_location.0.checked_sub( change.0.unsigned_abs() as usize ),	
+			start_location.0.checked_add( change.0.unsigned_abs() as usize ),
+		)
+			{ v }
+		else { return None };
+		
+		let y = match (
+			change.1 < 0,
+			start_location.1.checked_sub( change.1.unsigned_abs() as usize ),	
+			start_location.1.checked_add( change.1.unsigned_abs() as usize ),
+		)
 		{
-			// Sub X
-			match start_location.0.checked_sub( change.0.unsigned_abs() as usize )
-			{
-				None => return None,
-				Some(v) => v,
-			}
-		}
-		else
-		{
-			// Add X
-			match start_location.0.checked_add( change.0.unsigned_abs() as usize )
-			{
-				None => return None,
-				Some(v) => 
-				{
-					if v >= self[0].len() {return None}
-					v
-				}
-			}
-		},
-		if change.1 < 0
-		{
-			// Sub Y
-			match start_location.1.checked_sub( change.1.unsigned_abs() as usize )
-			{
-				None => return None,
-				Some(v) => v,
-			}
-		}
-		else
-		{
-			// Add Y
-			match start_location.1.checked_add( change.1.unsigned_abs() as usize )
-			{
-				None => return None,
-				Some(v) => 
-				{
-					if v >= self.len() {return None}
-					v
-				}
-			}
-		}
-		))
+			(true,  Some(v), _) |
+			(false, _, Some(v)) => { v },
+			_ => { return None },
+		};
+
+		// Make sure we're in the borders
+		if x > self[0].len() { return None }
+		if y > self   .len() { return None }
+
+		Some((x, y))
 	}
 
 	/// Take one step from a given location in a given `Direction`
@@ -177,8 +160,8 @@ impl MapFunction for CharMap
 		    Direction::Right => x = from.0.checked_add(1)?,
 		}
 		// Check out of bounds bottom & right
-		if x >= self[0].len()
-		|| y >= self.len()
+		if y >= self.len()
+		|| x >= self[y].len()
 		{
 			return None
 		}
@@ -187,7 +170,7 @@ impl MapFunction for CharMap
 	}
 
 	/// Get the `char` at a given `MapLoc` location
-	fn at(&self, location: MapLoc) -> Option<char>
+	fn at(&self, location: MapLoc) -> Option<T>
 	{
 		if location.0 >= self[0].len()
 		|| location.1 >= self.len()
@@ -198,16 +181,32 @@ impl MapFunction for CharMap
 		Some(self[location.1][location.0])
 	}
 
-	fn set(&mut self, location: MapLoc, c: char) -> bool
+	fn set(&mut self, location: MapLoc, item: T) -> bool
 	{
 		if location.0 >= self[0].len()
 		|| location.1 >= self.len()
 		{
 			return false
 		}
-		self[location.1][location.0] = c;
+		self[location.1][location.0] = item;
 		true
 	}
+
+	#[allow(clippy::needless_range_loop)]
+	fn find(&self, item: T) -> Option<MapLoc>
+	{
+		for y in 0..self.len()
+		{
+			for x in 0..self[y].len()
+			{
+				if self[y][x] == item
+				{
+					return Some((x, y))
+				}
+			}
+		}
+		None
+    }
 }
 
 /// The direction the guard is currently facing
@@ -241,6 +240,17 @@ impl Direction
 		    Direction::Down => 'v',
 		    Direction::Left => '<',
 		    Direction::Right => '>',
+		}	
+	}
+	#[must_use]
+	pub fn opposite(self) -> Self
+	{
+		match self
+		{
+		    Direction::Up => Direction::Down,
+		    Direction::Down => Direction::Up,
+		    Direction::Left => Direction::Right,
+		    Direction::Right => Direction::Left,
 		}	
 	}
 }

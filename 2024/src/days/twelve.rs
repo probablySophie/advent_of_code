@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use util::{print_map, CharMap, Direction, MapFunction, MapLoc};
+use util::{print_map, VecMap, Direction, MapFunction, MapLoc};
 
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/12.txt");
@@ -231,7 +231,7 @@ fn part_two(region_map: &[Region]) -> ResultType
 	fence_price
 }
 
-fn is_empty(map: &CharMap, location: MapLoc, direction: Direction, non_empty: char) -> bool
+fn is_empty(map: &VecMap<char>, location: MapLoc, direction: Direction, non_empty: char) -> bool
 {
 	if let Some(loc) = map.step(location, direction)
 	{
@@ -276,7 +276,7 @@ fn get_regions(input: &str) -> Vec<Region>
 /// * Height
 /// * Offset
 /// * Non-relative Locations
-fn find_locations(map: &mut CharMap, start_location: MapLoc, destructive: bool, plant: char) -> (usize, usize, MapLoc, Vec<MapLoc>)
+fn find_locations(map: &mut VecMap<char>, start_location: MapLoc, destructive: bool, plant: char) -> (usize, usize, MapLoc, Vec<MapLoc>)
 {
 	let mut locations = Vec::new();
 	let mut search_range = vec![ start_location ];
@@ -329,13 +329,13 @@ fn find_locations(map: &mut CharMap, start_location: MapLoc, destructive: bool, 
 
 const PROBLEM_PLANT: char = '.';
 
-fn get_single_region(map: &mut CharMap, start_location: MapLoc, destructive: bool) -> Region
+fn get_single_region(map: &mut VecMap<char>, start_location: MapLoc, destructive: bool) -> Region
 {	
 	let plant = map.at(start_location).unwrap();
 	let mut area = 0;
 
 	let (width, height, offset, found_locations) = find_locations(map, start_location, destructive, plant);
-	let mut region_map: CharMap = vec![ vec![ ' '; width + 1 ]; height + 1 ];
+	let mut region_map: VecMap<char> = vec![ vec![ ' '; width + 1 ]; height + 1 ];
 
 	if plant == PROBLEM_PLANT {
 		util::print_map(map);
