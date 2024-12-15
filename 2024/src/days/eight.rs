@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use util::{CharMap, MapFunction};
+use util::{VecMap, MapFunction};
 
 #[allow(unused)]
 const INPUT: &str = include_str!("../../input/8.txt");
@@ -53,10 +53,10 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	(pre_calc_time, part_one_time, part_two_time)
 }
 
-fn part_one(map: &CharMap) -> ResultType
+fn part_one(map: &VecMap<char>) -> ResultType
 {
 	let frequencies = get_frequencies(map);
-	let mut antinode_maps: Vec<CharMap> = Vec::new();
+	let mut antinode_maps: Vec<VecMap<char>> = Vec::new();
 
 	// Make an antinode map for each frequency
 	for frequency in frequencies
@@ -68,10 +68,10 @@ fn part_one(map: &CharMap) -> ResultType
 	count_antinodes(&antinode_maps)
 }
 
-fn part_two(map: &CharMap) -> ResultType
+fn part_two(map: &VecMap<char>) -> ResultType
 {
 	let frequencies = get_frequencies(map);
-	let mut antinode_maps: Vec<CharMap> = Vec::new();
+	let mut antinode_maps: Vec<VecMap<char>> = Vec::new();
 
 	// Make an antinode map for each frequency
 	for frequency in frequencies
@@ -83,7 +83,7 @@ fn part_two(map: &CharMap) -> ResultType
 	count_antinodes(&antinode_maps)
 }
 
-fn count_antinodes(maps: &[CharMap]) -> ResultType
+fn count_antinodes(maps: &[VecMap<char>]) -> ResultType
 {
 	let mut antinode_locations = 0;
 	for y in 0..maps[0].len()
@@ -105,7 +105,7 @@ fn count_antinodes(maps: &[CharMap]) -> ResultType
 }
 
 /// Get all the frequencies that are in a map
-fn get_frequencies(map: &CharMap) -> Vec<char>
+fn get_frequencies(map: &VecMap<char>) -> Vec<char>
 {
 	let mut frequencies = Vec::new();
 
@@ -129,7 +129,7 @@ fn get_frequencies(map: &CharMap) -> Vec<char>
 }
 
 /// Finds all anti-nodes for a given frequency
-fn find_antinodes(map: &CharMap, frequency: char, single_loop: bool) -> CharMap
+fn find_antinodes(map: &VecMap<char>, frequency: char, single_loop: bool) -> VecMap<char>
 {
 	let mut antinodes = vec![ vec![ '.' ; map[0].len() ] ; map.len() ];
 	let mut node_locations: Vec<(usize, usize)> = Vec::new();
