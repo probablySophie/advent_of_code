@@ -20,9 +20,11 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	
 	// TODO: WARN: Remember to un-comment today's line in ../main.rs
 	// TODO: Do any pre-calculation here
+	// let parsed = parse_input(EXAMPLE_IMPUT_1, "Example 1", print_results);
 
 	// ~ ~ ~ ~ ~ END OF PRE CALCULATION ~ ~ ~ ~ ~
 	let pre_calc_time = time_before.elapsed();
+	if print_results { util::print_precalc(pre_calc_time) };
 
 	// Part 1
 	TimedRun!(time_before, part_one_result, part_one(), part_one_time);
@@ -53,4 +55,10 @@ fn part_one() -> ResultType
 fn part_two() -> ResultType
 {
 	0
+}
+
+fn parse_input<'a>(input: &'a str, name: &str, print_results: bool)
+{
+	if print_results { println!("Parsing: {name}") };
+	
 }

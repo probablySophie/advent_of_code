@@ -19,13 +19,22 @@ else
 fi
 
 cp src/days/empty.rs $rs_file
+printf "Made $rs_file\n"
 sed -i "s/~DAY_NUM~/${day_num-1}/g" $rs_file
+printf "Replaced '~DAY_NUM~' with ${day_num-1} in $rs_file\n"
 touch $txt_file
+printf "Made $txt_file\n"
 
-printf "\npub mod ${day_text[$day_num-1]};" >> src/days/mod.rs
+# Does the file end with a new-line?
+if [[ "$(tail -c 1 src/days/mod.rs)" == "" ]]; then
+	printf "pub mod ${day_text[$day_num-1]};" >> src/days/mod.rs
+else
+	printf "\npub mod ${day_text[$day_num-1]};" >> src/days/mod.rs
+fi
+printf "Updated src/days/mod.rs\n";
 
 printf "Open created files? [y/n]\n(n) > "
 read answer
 if [[ "$answer" == y* ]]; then
-	$EDITOR "$rs_file" "$txt_file"
+	$EDITOR "$rs_file" "$txt_file" "src/main.rs" "README.md"
 fi

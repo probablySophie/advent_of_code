@@ -25,13 +25,12 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	
 	let time_before = Instant::now();
 	
-	// let map = make_map(INPUT);
-	let map = make_map(EXAMPLE_INPUT_1);
+	let map = make_map(INPUT);
+	// let map = make_map(EXAMPLE_INPUT_1);
 
 	if print_results
 	{
 		println!("Map Size: {}x{}", map[0].len(), map.len());
-
 	}
 	
 	let pre_calc_time = time_before.elapsed();
@@ -59,153 +58,267 @@ type LevelMap = Vec<Vec<char>>;
 
 fn part_one(map: &mut LevelMap) -> i32
 {
-	let Some(mut guard_location) = get_guard_loc(map)
+	let Some(mut position) = map.find('^')
 	else { return -1 };
-	let mut guard_direction = Direction::Up;
+	let mut direction = Direction::Up;
+	let mut unique_positions = 0;
 
-	'mainloop: loop
+	while let Some(new_position) = map.step(position, direction)
 	{
-		// Record where we've been!
-		map[guard_location.1][guard_location.0] = 'X';
-		
-		// Take a step
-		let Some(new_pos) = map.step(guard_location, guard_direction)
-		// Else we've left the map left/top
-		else { break 'mainloop; };
-		// And check if we've exited on the right/bottom
-		if new_pos.0 > (map[0].len() - 1) || new_pos.1 > (map.len() - 1)
-		{ break 'mainloop; }
-
-		// Did we bump into something
-		if map[new_pos.1][new_pos.0] == '#'
+		if map.at(position) != Some('X')
 		{
-			guard_direction = guard_direction.turn_right();
+			unique_positions += 1;
+			map.set(position, 'X'); // Record where we've been
 		}
-		else
+		if map.at(new_position) == Some('#') // Are we about to hit something?
 		{
-			// Update the guard's location
-			guard_location = new_pos;
+			direction = direction.turn_right(); // Turn right!
+			continue
 		}
+		position = new_position; // Update the guard's location
+	}
+	if map.at(position) != Some('X')
+	{
+		unique_positions += 1;
+		map.set(position, 'X'); // Record where we've been
 	}
 	// print_map(map);
-	count_points(map)
+	unique_positions
 }
 
 fn part_two(map: &mut LevelMap) -> i32
 {
 	let (points, point_map) = Point::build_point_map(map);
-	// TODO: use this point map
-	// Work out everywhere that adding a single new obstical would cause a loop
-	// But it can't be the guard's starting space
 
-	// For the loop checking, instead of iterating through each position on the map
-	// Go from point to point - should be considerably faster!
+	let mut checked_obstacles: Vec<Vec<Option<bool>>> = 
+		vec![ vec![ None; map[0].len() ]; map.len() ];
+		
+	let Some(starting_location) = map.find('^') else { return -1 };
 
-	let mut checked_obstacles: Vec<Vec<Option<bool>>> = vec![ vec![ None; map[0].len() ]; map.len() ];
-	let mut obstacle_counter = 0;
-	
-	let Some(starting_location) = get_guard_loc(map)
-	else { return -1 };
-	
-	let mut guard_direction = Direction::Up;
-	let mut guard_location = starting_location;
-	'mainloop: loop
+	let mut obstacle_counter = 0; // Our score
+	let mut direction = Direction::Up;
+	let mut position = starting_location;
+	while let Some(new_pos) = map.step(position, direction)
 	{
-		// Take a step
-		let Some(new_pos) = map.step(guard_location, guard_direction)
-		// Else we've left the map left/top
-		else { break 'mainloop; };
-		// And check if we've left right/bottom
-		if new_pos.0 > (map[0].len() - 1) || new_pos.1 > (map.len() - 1)
-		{ break 'mainloop; }
-
 		// Did we bump into something
 		if map[new_pos.1][new_pos.0] == '#'
 		{
-			guard_direction = guard_direction.turn_right();
+			direction = direction.turn_right();
 			continue;
 		}
-		// Now check if adding an obstical infront of the guard would cause a loop
+		// Now check if adding an obstacle in front of the guard would cause a loop
 		if checked_obstacles[new_pos.1][new_pos.0].is_none()
 		&& new_pos != starting_location
 		{
-			let result = is_loop(map, new_pos);
-			checked_obstacles[new_pos.1][new_pos.0] = Some( result );
-			if result { obstacle_counter += 1; }
+			let result = point_loop(map, &points, &point_map, new_pos, starting_location);
+			checked_obstacles[new_pos.1][new_pos.0] = Some( result ); // Save the result
+			if result { obstacle_counter += 1; } // Increase our counter if it was a loop!
 		}
-		// Update the guard's location
-		guard_location = new_pos;
+		position = new_pos; // Update the guard's location
+		// println!("{:?}", points[point_map.at((52, 82)).unwrap().unwrap()]);
+		// panic!();
 	}
-
-	obstacle_counter
+	for line in point_map
+	{
+		for item in line
+		{
+			match item
+			{
+				None => { print!(" ") },
+				Some(u) => {
+					match (
+						points[u].from_below.is_some(),
+						points[u].from_above.is_some(),
+						points[u].from_left.is_some(),
+						points[u].from_right.is_some()
+					)
+					{
+					    (true, true, true, true) => print!("╋"),    // all directions
+					    (true, true, true, false) => print!("┫"),   // 
+					    (true, true, false, true) => print!("┣"),   //
+					    (true, true, false, false) => print!("┃"),  //
+					    (true, false, true, true) => print!("┳"),   //
+					    (true, false, true, false) => print!("┓"),  //
+					    (true, false, false, true) => print!("┏"),  //
+					    (true, false, false, false) => print!("┛"), //
+					    (false, true, true, true) => print!("┻"),   //
+					    (false, true, true, false) => print!("┗"),  //
+					    (false, true, false, true) => print!("╻"),  //
+					    (false, true, false, false) => print!("╹"), //
+					    (false, false, true, true) => print!("━"),  //
+					    (false, false, true, false) => print!("╸"), //
+					    (false, false, false, true) => print!("╺"), //
+					    
+					    (false, false, false, false) => print!("."),
+					}
+				},
+			}
+		}
+		println!();
+	}
+	if map.len() < 20
+	{
+		assert_eq!(6, obstacle_counter);
+	}
+	else
+	{
+		assert_eq!(1705, obstacle_counter);
+	}
+	obstacle_counter // return our score
 }
 
-fn is_loop(map: &mut LevelMap, obstical_location: (usize, usize)) -> bool
+fn get_starting_pos(map: &LevelMap, points: &[Point], point_map: &PointMap, obstacle_location: MapLoc, starting_position: MapLoc, direction: Direction) -> (Option<MapLoc>, Direction)
 {
-	let mut new_map = map.clone();
-	new_map[obstical_location.1][obstical_location.0] = 'O';
-	
-	let Some(mut guard_location) = get_guard_loc(&new_map)
-	else { return false };
-
-	let mut guard_direction = Direction::Up;
-
-	let mut num_turns = 0;
-	let mut did_180 = false;
-
-	for _ in 0..=10000
+	let position =
+		obstacle_or_location(
+			starting_position,
+			Point::best_point_on_line(points, starting_position, direction),
+			obstacle_location
+	);
+	if point_map.at(position).unwrap().is_none()
 	{
-		// Else take a step
-		let Some(new_pos) = map.step(guard_location, guard_direction)
-		else { return false };
-		if new_pos.0 >= new_map[0].len()
-		|| new_pos.1 >= new_map.len()
-		{
-			return false
-		}
-		if new_map[new_pos.1][new_pos.0] == '#'
-		|| new_map[new_pos.1][new_pos.0] == 'O'
-		{
-			guard_direction = guard_direction.turn_right();
-			num_turns += 1;
+		// Step backwards
+		let pos = map.step(position, direction.opposite()).unwrap();
+		// Turn right (we hit something)
+		let dir = direction.turn_right();
+		return (Point::best_point_on_line(points, pos, dir), dir);
+	};
+	// Else
+	(Some(position), Direction::Up)
+}
+
+fn point_loop(map: &mut LevelMap, points: &[Point], point_map: &PointMap, obstacle_location: MapLoc, starting_position: MapLoc) -> bool
+{
+	let debug_print = false;
+	if debug_print {println!("\nObstacle: {obstacle_location:?}");} // TEMP
+	let mut map_clone = map.clone(); // TEMP
+	map_clone.set(obstacle_location, 'O');
+
+	// Either the first point we hit, or the obstacle itself
+	let (mut position, mut direction) = get_starting_pos(map, points, point_map, obstacle_location, starting_position, Direction::Up);
+
+	// TEMP map drawing & print
+	if let Some(pos) = position { map_clone.set(pos, '1'); }
+	
+	let mut next_point: Option<MapLoc> = None;
+	let mut hits: Vec<(MapLoc, Direction)> = Vec::new();
+	let mut is_loop: bool = false;
+
+	let mut i = 0;
+	'mainLoop: while let Some(current_position) = next_point.or(position)
+	{
+		if debug_print {println!("step {i} at {current_position:?} facing {direction:?}"); i += 1;}
+		// If we're standing on an obstacle, then the current point is none
+		let point = if let Some(u) = point_map.at(current_position).unwrap() 
+		{ 
+			points[u].clone() // We're standing on a point :)
 		}
 		else
-		{
-			// did we just turn?
-			if num_turns > 0
-			{
-				// INFO: This check just here catches 152 endless loops!! (from 6.txt)
-				match ( num_turns, did_180 )
-				{
-					// We did a 180
-					(2, false) => { did_180 = true },
-					// We've done two 180s in a row.  That's a loop babeey
-					(2, true)  => { return true },
-					// Else we didn't just do a 180
-					_ => { did_180 = false },
-				}
-				// And reset
-				num_turns = 0;
-			}
-			// Mark where we've been & which direction we were going
-			new_map[guard_location.1][guard_location.0] = guard_direction.to_char();
-			
-			guard_location = new_pos;
+		{ // Walk from here
+			let temp_loc = map.step(current_position, direction.opposite()).unwrap();
+			let new_dir = direction.turn_right();
 
-			// We've already been here before and going this same direction!?
-			// INFO: This check catches 1684 loops!! (from 6.txt)
-			if new_map[guard_location.1][guard_location.0]
-			== guard_direction.to_char()
+			match walk_from(map, temp_loc, new_dir, obstacle_location)
 			{
-				return true
+				None => { break },
+				Some((new_position, new_direction)) => 
+				{
+					next_point = None;
+					position = Some(new_position);
+					direction = new_direction;
+				}
 			}
-		}		
+			
+			continue
+		};
+		
+		map_clone.set(point.location, '+'); // TEMP
+		
+		// Have we been here before?
+		for hit in &hits
+		{
+			if hit.0 == current_position
+			&& hit.1 == direction
+			{
+				is_loop = true; // we've been here before!
+				break 'mainLoop
+			}
+		}
+		hits.push((current_position, direction)); // Add this spot to the list
+		
+		let Some(going_to) = point.from(direction) // Where are we going?!
+		
+		else // Off the edge of the map :(
+		{
+			let going_from = map.step(point.location, direction.opposite()).unwrap();
+			direction = direction.turn_right();
+			if debug_print {println!("point {:?} walking from {going_from:?} going {direction:?}", point.location);}
+			
+			match walk_from(map, going_from, direction, obstacle_location)
+			{
+				None =>
+				{
+					map_clone.set(going_from, direction.to_char()); // TEMP
+					if debug_print{println!("Walked off the edge - going_to was none & from {going_from:?}");}
+					is_loop = false;
+					break 'mainLoop
+				},
+				Some((walked_to, now_facing)) =>
+				{
+					next_point = None;
+					position = Some(walked_to);
+					direction = now_facing;
+				}
+			}
+			if position == Some(obstacle_location)
+			{
+				println!("We hit
+	    	(( going_from.0 < going_to.0 // We're less than both the final location
+	    	&& going_from.0 < obstacle.0 // And the obs the obstacle!");
+			}
+			continue
+		};
+
+		next_point = Some(
+			obstacle_or_location(
+				map.step(current_position, direction.opposite()).unwrap(), 
+				Some(going_to), 
+				obstacle_location
+			)
+		);
+		position = None;
+		direction = direction.turn_right();		
 	}
-	// If we've taken more that 1000 steps, then it's PROBABLY true
-	// println!("\n{obstical_location:?}");
-	// print_map(&new_map);
-	// INFO: We now have no timeouts!!!!
-	true
+	// And that's the end...
+	if debug_print {
+		util::print_map(&map_clone); // TEMP
+		println!("Is loop? {is_loop}"); // TEMP
+	}
+	is_loop
+}
+
+fn walk_from(map: &LevelMap, location: MapLoc, direction: Direction, obstacle_location: MapLoc) -> Option<(MapLoc, Direction)>
+{
+	// let start_loc = location;
+	let (mut location, mut direction) = (location, direction);
+	let mut hit_something = false;
+	
+	while ! hit_something
+	{
+		// Have we walked off of the map?
+		let new_loc = map.step(location, direction)?;
+		if map.at(new_loc) == Some('#')
+		{
+			hit_something = true;
+		}
+		else if new_loc == obstacle_location
+		{
+			direction = direction.turn_right();
+			continue
+		}
+		location = new_loc;
+	}
+	Some((location, direction))
 }
 
 /// Turn an input `&str` into a `Vec<Vec<char>>` :)
@@ -229,41 +342,9 @@ fn print_map(map: &LevelMap)
 	}
 }
 
-/// Get the current location of the guard on the map
-/// Returns None if the guard isn't on the map
-fn get_guard_loc(map: &LevelMap) -> Option<(usize, usize)>
-{
-	for (y, line) in map.iter().enumerate()
-	{
-		for (x, c) in line.iter().enumerate()
-		{
-			match *c
-			{
-				'^'|'v'|'<'|'>' => { return Some((x, y)) }
-				_ => {}
-			}
-		}
-	}
-	None
-}
 
-fn count_points(map: &LevelMap) -> i32
-{
-	let mut count = 0;
-	for line in map
-	{
-		for c in line
-		{
-			if *c == 'X'
-			{
-				count += 1;
-			}
-		}
-	}
-	count
-}
 
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
 struct Point
 {
 	pub location: MapLoc,
@@ -272,10 +353,21 @@ struct Point
 	pub from_left: Option<MapLoc>,
 	pub from_right: Option<MapLoc>,
 }
+type PointMap = Vec<Vec<Option<usize>>>;
 impl Point
 {
+	pub fn from(&self, direction: Direction) -> Option<MapLoc>
+	{
+		match direction
+		{
+			Direction::Up => self.from_below,
+			Direction::Down => self.from_above,
+			Direction::Left => self.from_right,
+			Direction::Right => self.from_left,
+		}
+	}
 	#[allow(clippy::needless_range_loop)]
-	pub fn build_point_map(map: &LevelMap) -> (Vec<Point>, Vec<Vec<Option<usize>>>)
+	pub fn build_point_map(map: &LevelMap) -> (Vec<Point>, PointMap)
 	{
 		let mut points = Vec::new();
 		let mut point_map: Vec<Vec<Option<usize>>> = vec![ vec![ None; map[0].len() ]; map.len() ];
@@ -294,51 +386,54 @@ impl Point
 		// Fill in the links
 		for i in 0..points.len()
 		{
-			for i_2 in 0..points.len()
-			{
-				if i == i_2 { continue }; // if they're the same guy, skip
-				let l1 = points[i].location;
-				let l2 = points[i_2].location;
+			let location = points[i].location;
+			
+			if let Some(pos) = map.step(location, Direction::Down)
+			{ points[i].from_below = Point::best_point_on_line(&points, pos, Direction::Right) }
 
-				if l1.0.abs_diff(l2.0) != 1 // if they can't be relative friends, skip
-				&& l1.1.abs_diff(l2.1) != 1
-				{ continue };
+			if let Some(pos) = map.step(location, Direction::Left)
+			{ points[i].from_left = Point::best_point_on_line(&points, pos, Direction::Down) }
+			
+			if let Some(pos) = map.step(location, Direction::Right)
+			{ points[i].from_right = Point::best_point_on_line(&points, pos, Direction::Up) }
 
-				// let mut map_copy = map.clone();
-				// map_copy.set(l1, '@');
-				// map_copy.set(l2, '&');
-				// util::print_map(&map_copy);
-
-				// println!("{:?} {:?} {:?} {:?}", l1.0.abs_diff(l2.0), l1.1.abs_diff(l2.1), l1.0.cmp(&l2.0), l1.1.cmp(&l2.1));
-
-				// Work out what direction they are from each-other
-				match (l1.0.abs_diff(l2.0), l1.1.abs_diff(l2.1), l1.0.cmp(&l2.0), l1.1.cmp(&l2.1))
-				{
-					// From bottom - good
-					(_, 1, std::cmp::Ordering::Less, std::cmp::Ordering::Less) =>
-					{
-						set_if_less_or_none(&mut points[i], l2, Direction::Down);
-					},
-					// From top - good
-					(_, 1, std::cmp::Ordering::Greater, std::cmp::Ordering::Greater) =>
-					{
-						set_if_less_or_none(&mut points[i], l2, Direction::Up);
-					},
-					// From left - good
-					(1, _, std::cmp::Ordering::Greater, std::cmp::Ordering::Less) =>
-					{
-						set_if_less_or_none(&mut points[i], l2, Direction::Left);
-					},
-					// From right - good
-					(1, _, std::cmp::Ordering::Less, std::cmp::Ordering::Greater) =>
-					{
-				 		set_if_less_or_none(&mut points[i], l2, Direction::Right);
-					},
-					_ => {} // Bad
-				 }
-			}
+			if let Some(pos) = map.step(location, Direction::Up)
+			{ points[i].from_above = Point::best_point_on_line(&points, pos, Direction::Left) }
 		}
 		(points, point_map)
+	}
+
+	pub fn best_point_on_line(points: &[Point], location: MapLoc, direction: Direction) -> Option<MapLoc>
+	{
+		let mut best: Option<MapLoc> = None;
+
+		for point in points
+		{
+			let l1 = point.location;
+			let l2 = location;
+
+			if direction != match (l1.0.cmp(&l2.0), l1.1.cmp(&l2.1))
+			{
+			    (std::cmp::Ordering::Less   , std::cmp::Ordering::Equal  ) => Direction::Left,
+			    (std::cmp::Ordering::Equal  , std::cmp::Ordering::Less   ) => Direction::Up,
+			    (std::cmp::Ordering::Equal  , std::cmp::Ordering::Greater) => Direction::Down,
+			    (std::cmp::Ordering::Greater, std::cmp::Ordering::Equal  ) => Direction::Right,
+			    _ => { continue }
+			}
+			{
+				continue
+			}
+			// println!("{l2:?} {l1:?} {:?} {:?}", l1.0.cmp(&l2.0), l1.1.cmp(&l2.1));
+			// println!("{:?} {:?} {:?}", l1.0.abs_diff(l2.0), l1.1.abs_diff(l2.1), direction);
+			
+			match (l1.0.abs_diff(l2.0), l1.1.abs_diff(l2.1), direction)
+			{
+				(_, 0, Direction::Left | Direction::Right) => if best.is_none() || l1.0.abs_diff(l2.0) < l1.0.abs_diff(best.unwrap().0) { best = Some(l1) }
+				(0, _, Direction::Up   | Direction::Down ) => if best.is_none() || l1.1.abs_diff(l2.1) < l1.1.abs_diff(best.unwrap().1) { best = Some(l1) },
+				_ => {} // Bad
+			 }
+		}
+		best
 	}
 }
 
@@ -349,13 +444,8 @@ fn set_if_less_or_none(point: &mut Point, location: MapLoc, direction: Direction
 		Direction::Up =>
 		{
 			if point.from_above.is_none()
-			{
-				point.from_above = Some(location);
-				return
-			}
-			// Else
-			if point.location.1.abs_diff(location.1) 
-				> point.location.1.abs_diff(point.from_above.unwrap().1)
+			|| point.location.1.abs_diff(location.1) 
+				< point.location.1.abs_diff(point.from_above.unwrap().1)
 			{
 				point.from_above = Some(location);
 			}
@@ -363,13 +453,8 @@ fn set_if_less_or_none(point: &mut Point, location: MapLoc, direction: Direction
 		Direction::Down =>
 		{
 			if point.from_below.is_none()
-			{
-				point.from_below = Some(location);
-				return
-			}
-			// Else
-			if point.location.1.abs_diff(location.1) 
-				> point.location.1.abs_diff(point.from_below.unwrap().1)
+			|| point.location.1.abs_diff(location.1) 
+				< point.location.1.abs_diff(point.from_below.unwrap().1)
 			{
 				point.from_below = Some(location);
 			}
@@ -377,13 +462,8 @@ fn set_if_less_or_none(point: &mut Point, location: MapLoc, direction: Direction
 		Direction::Left =>
 		{
 			if point.from_left.is_none()
-			{
-				point.from_left = Some(location);
-				return
-			}
-			// Else
-			if point.location.0.abs_diff(location.0) 
-				> point.location.0.abs_diff(point.from_left.unwrap().0)
+			|| point.location.0.abs_diff(location.0) 
+				< point.location.0.abs_diff(point.from_left.unwrap().0)
 			{
 				point.from_left = Some(location);
 			}
@@ -391,16 +471,72 @@ fn set_if_less_or_none(point: &mut Point, location: MapLoc, direction: Direction
 		Direction::Right =>
 		{
 			if point.from_right.is_none()
-			{
-				point.from_right = Some(location);
-				return
-			}
-			// Else
-			if point.location.0.abs_diff(location.0) 
-				> point.location.0.abs_diff(point.from_right.unwrap().0)
+			|| point.location.0.abs_diff(location.0) 
+				< point.location.0.abs_diff(point.from_right.unwrap().0)
 			{
 				point.from_right = Some(location);
 			}
 		},
 	}
 }
+
+#[test] // (6, 4) to (6, 9) or (6, 7)
+fn test_obstacle_or_location_1() { println!();
+	assert_eq!((6, 7),
+		obstacle_or_location((6, 4), Some((6, 9)), (6, 7))
+	);
+}
+#[test] // (8, 6) to (1, 6) or (3, 6)
+fn test_obstacle_or_location_2() { println!();
+	assert_eq!((3, 6),
+		obstacle_or_location((8, 6), Some((1, 6)), (3, 6))
+	);
+}
+
+fn obstacle_or_location(going_from: MapLoc, going_to: Option<MapLoc>, obstacle: MapLoc) -> MapLoc
+{
+	let Some(going_to) = going_to else { return obstacle };
+	// println!("\tfrom {going_from:?} to {going_to:?} or {obstacle:?}");	
+
+	// Did we change in X, or Y?
+	match ( going_from.0.abs_diff(going_to.0) == 0, going_from.1.abs_diff(going_to.1) == 0 )
+	{
+	    (false, false) | // That's... not on a straight line...?
+	    (true , true ) => {}, // We stayed in the same spot?
+	    
+	    (true , false) => // Change in Y
+	    {
+	    	#[cfg(test)] { println!("\tChange in Y") }
+	    	// No X difference please
+	    	if going_from.0.abs_diff(obstacle.0) == 0
+	    	&& going_from.1.abs_diff(going_to.1) > going_from.1.abs_diff(obstacle.1) &&
+	    	(( going_from.1 < going_to.1 // We're less than both the final location
+	    	&& going_from.1 < obstacle.1 // And the obstacle
+	    	) ||
+	    	(  going_from.1 > going_to.1 // We're less than both the final location
+	    	&& going_from.1 > obstacle.1 // And the obstacle
+	    	))
+	    	{
+	    		return obstacle
+	    	}
+	    },
+	    (false, true ) => // Change in X
+	    {
+	    	#[cfg(test)] { println!("\tChange in X") }
+	    	// No Y difference please
+	    	if going_from.1.abs_diff(obstacle.1) == 0
+	    	&& going_from.0.abs_diff(going_to.0) > going_from.0.abs_diff(obstacle.0) &&
+	    	(( going_from.0 < going_to.0 // We're less than both the final location
+	    	&& going_from.0 < obstacle.0 // And the obstacle
+	    	) ||
+	    	(  going_from.0 > going_to.0 // We're less than both the final location
+	    	&& going_from.0 > obstacle.0 // And the obstacle
+	    	))
+	    	{
+	    		return obstacle
+	    	}
+	    },
+	}
+	going_to
+}
+

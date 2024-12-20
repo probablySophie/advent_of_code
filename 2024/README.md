@@ -7,17 +7,20 @@ https://adventofcode.com/2024
 
 <!-- This is a big Repo with multiple years, so you'll need to go into the year's folder and then just `cargo run`! -->
 
+*As a fun pre-warning, there is some VERY POOR error-handling practice here.*  
+*Do NOT grep for `panic!` or `.unwrap` if you don't want to be truly horrified*
+
 ****
 
 ### Days & Stars
 
-Total ⭐: 30/50  
+Total ⭐: 34/50  
 
 |1|⭐⭐|2|⭐⭐|3|⭐⭐|4|⭐⭐|5|⭐⭐|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |**6**|⭐⭐|**7**|⭐⭐|**8**|⭐⭐|**9**|⭐⭐|**10**|⭐⭐|
 |**11**|⭐⭐|**12**|⭐⭐|**13**|⭐⭐|**14**|⭐⭐|**15**|⭐⭐|
-|**16**|☆☆|**17**|☆☆|**18**|☆☆|**19**|☆☆|**20**|☆☆|
+|**16**|⭐☆|**17**|⭐☆|**18**|⭐⭐|**19**|⭐⭐|**20**|☆☆|
 |**21**|☆☆|**22**|☆☆|**23**|☆☆|**24**|☆☆|**25**|☆☆|
 ****
 

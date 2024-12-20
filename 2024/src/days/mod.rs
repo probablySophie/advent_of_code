@@ -14,3 +14,7 @@ pub mod twelve;
 pub mod thirteen;
 pub mod fourteen;
 pub mod fifteen;
+pub mod sixteen;
+pub mod seventeen;
+pub mod eighteen;
+pub mod nineteen;
