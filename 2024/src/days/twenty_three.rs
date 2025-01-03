@@ -20,10 +20,8 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	let time_before = Instant::now();
 	// ~ ~ ~ ~ ~ PRE CALCULATION ~ ~ ~ ~ ~
 
-	let computers = parse_input(EXAMPLE_INPUT_1, "Example 1", print_results);
-	
-	// TODO: Do any pre-calculation here
-	// let parsed = parse_input(EXAMPLE_INPUT_1, "Example 1", print_results);
+	let computers = parse_input(INPUT, "The real Input", print_results);
+	// let computers = parse_input(EXAMPLE_INPUT_1, "Example 1", print_results);
 
 	// ~ ~ ~ ~ ~ END OF PRE CALCULATION ~ ~ ~ ~ ~
 	let pre_calc_time = time_before.elapsed();
@@ -56,8 +54,56 @@ fn part_one(computers: &[ConnectedPoint<ResultType>]) -> ResultType
 	// Make a set of all of the loops
 	// For each set of 3, if any have the x value of t_num, inc our count
 	let mut possible_rings = 0;
+	
+	let mut rings: Vec<[usize; 3]> = Vec::new();
 
+	// Computer 1
+	for i1 in 0..computers.len()
+	{
+		// Computer 2
+		for connection_1 in &computers[i1].connections
+		{
+			let i2 = connection_1.other_point;
 
+			// Computer 3
+			for connection_2 in &computers[i2].connections
+			{
+				let i3 = connection_2.other_point;
+
+				for connection_3 in &computers[i3].connections
+				{
+					// Have we looped back to the start?
+					if connection_3.other_point == i1
+					{
+						let mut sorted = [i1, i2, i3];
+						sorted.sort();
+
+						if ! find_in(&rings, &sorted)
+						{
+							rings.push(sorted);
+						}						
+					}
+				}
+			}
+		}
+	}
+
+	'ringLoop: for ring in &rings
+	{
+		for computer_i in ring
+		{
+			if computers[*computer_i].position.0 == t_num
+			{
+				possible_rings += 1;
+				println!("{} {} {}",
+					usize_pair_to_name(computers[ring[0]].position),
+					usize_pair_to_name(computers[ring[1]].position),
+					usize_pair_to_name(computers[ring[2]].position)
+				);
+				continue 'ringLoop;
+			}
+		}
+	}
 
 	possible_rings
 }
