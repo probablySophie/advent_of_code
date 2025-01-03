@@ -36,11 +36,33 @@ where T: std::fmt::Display
 	}
 }
 
+pub fn print_char_map(map: &VecMap<char>, replacements: &[(char, char)])
+{
+	for line in map
+	{
+		'lineLoop: for c in line
+		{
+			for replacement in replacements
+			{
+				if *c == replacement.0
+				{
+					print!("{}", replacement.1);
+					continue 'lineLoop;
+				}
+			}
+			print!("{c}");
+		}
+		println!();
+	}
+}
+
+
 pub trait MapFunction<T>
 {
 	fn get_new_location(&self, start_location: Pair<usize>, change: (i32, i32)) -> Option<Pair<usize>>;
 	fn step(&self, start_location: Pair<usize>, direction: Direction) -> Option<Pair<usize>>;
 	fn at(&self, location: Pair<usize>) -> Option<T>;
+	fn at_unchecked(&self, location: Pair<usize>) -> T;
 	fn set(&mut self, location: Pair<usize>, c: T) -> bool;
 	/// Returns the FIRST occurance of a given item
 	fn find(&self, item: T) -> Option<Pair<usize>>;
@@ -99,8 +121,8 @@ impl<T: Copy + PartialEq> MapFunction<T> for VecMap<T>
 		};
 
 		// Make sure we're in the borders
-		if x > self[0].len() { return None }
-		if y > self   .len() { return None }
+		if x >= self[0].len() { return None }
+		if y >= self   .len() { return None }
 
 		Some((x, y))
 	}
@@ -130,7 +152,8 @@ impl<T: Copy + PartialEq> MapFunction<T> for VecMap<T>
 		Some((x, y))
 	}
 
-	/// Get the `char` at a given `Pair<usize>` location
+	/// Gets the `T` at a given `Pair<usize>` location
+	/// Returns `None` if an invalid location was provided
 	fn at(&self, location: Pair<usize>) -> Option<T>
 	{
 		if location.0 >= self[0].len()
@@ -140,6 +163,15 @@ impl<T: Copy + PartialEq> MapFunction<T> for VecMap<T>
 		}
 		
 		Some(self[location.1][location.0])
+	}
+	
+	/// Get the `T` value at a given `Pair<usize>` location
+	/// **Does not check whether the given location was in bounds**
+	/// ### Panics
+	/// * Will panic if a location out of the bounds of the `VecMap<T>` is requested
+	fn at_unchecked(&self, location: Pair<usize>) -> T
+	{
+		self[location.1][location.0]
 	}
 
 	fn set(&mut self, location: Pair<usize>, item: T) -> bool

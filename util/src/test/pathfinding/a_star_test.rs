@@ -1,3 +1,4 @@
+use super::get_best_path;
 #[cfg(test)]
 use super::{binary_insert, Node, NodeMap};
 #[cfg(test)]
@@ -87,4 +88,21 @@ fn binary_insert_test_2()
 		Node { position: (1, 0), g_score: 0, h_score: 13 , previous: 0, open: true},
 		3
 	);
+}
+
+#[test]
+fn weird_keypad_issue() // from advent of code 2024 day 21 part 1
+{
+	let map = vec![
+		vec![ '7', '8', '9'],
+		vec![ '4', '5', '6'],
+		vec![ '1', '2', '3'],
+		vec![ ' ', '0', 'A']
+	];
+
+	let (distance, path) = get_best_path(&map, &[' '], (2, 0), (2, 3))
+		.expect("Yeah, that's bad");
+
+	println!("{distance}");
+	assert_eq!(distance, 3); // It's literally 3 steps
 }

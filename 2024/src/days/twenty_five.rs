@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 // #[allow(unused)]
-// const INPUT: &str = include_str!("../../input/~DAY_NUM~.txt");
+// const INPUT: &str = include_str!("../../input/25.txt");
 #[allow(unused)]
 const EXAMPLE_INPUT_1: &str = "";
 #[allow(unused)]
@@ -10,10 +10,10 @@ const EXAMPLE_INPUT_2: &str = "";
 // For if we need to change it up!
 type ResultType = i32;
 
-//https://adventofcode.com/2024/day/~DAY_NUM~
+//https://adventofcode.com/2024/day/25
 pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 {
-	if print_results {println!("Day ~DAY_NUM~");}
+	if print_results {println!("Day 25");}
 	
 	let time_before = Instant::now();
 	// ~ ~ ~ ~ ~ PRE CALCULATION ~ ~ ~ ~ ~

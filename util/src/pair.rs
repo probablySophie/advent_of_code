@@ -1,4 +1,6 @@
-use std::ops::{Add, Sub};
+use std::{cmp::Ordering, ops::{Add, Sub}};
+
+use crate::Direction;
 
 
 pub type Pair<T> = (T, T);
@@ -14,6 +16,8 @@ pub trait PairFunctions<T>
 	fn x(&self) -> T;
 	/// Get the second item in the tuple
 	fn y(&self) -> T;
+	/// Returns an optional Left/Right, Up/Down pair based on the given point's relative positioon
+	fn directions_to(&self, other_point: Pair<T>) -> (Option<Direction>, Option<Direction>);
 }
 
 impl<T> PairFunctions<T> for Pair<T>
@@ -29,6 +33,39 @@ where T: Copy + PartialOrd + PartialEq + Sub<Output = T> + Add<Output = T> {
 			else { pair.1 - self.1 };
 		
 		a + b
+	}
+
+	fn directions_to(&self, other_point: Pair<T>) -> (Option<Direction>, Option<Direction>)
+	{
+    	match ( self.0.partial_cmp(&other_point.0), self.1.partial_cmp(&other_point.1) )
+    	{
+			(None, None) => (None, None),
+			(None, Some(y_diff)) =>
+				(None, 
+				match y_diff {
+					Ordering::Less => Some(Direction::Down),
+					Ordering::Equal => None,
+					Ordering::Greater => Some(Direction::Up),
+				}),
+			(Some(x_diff), None) =>
+				(match x_diff {
+						Ordering::Less => Some(Direction::Right),
+						Ordering::Equal => None,
+						Ordering::Greater => Some(Direction::Left)
+				},
+				None),
+			(Some(x_diff), Some(y_diff)) =>
+				(match x_diff {
+					Ordering::Less => Some(Direction::Right),
+					Ordering::Equal => None,
+					Ordering::Greater => Some(Direction::Left),
+				},	
+				match y_diff {
+					Ordering::Less => Some(Direction::Down),
+					Ordering::Equal => None,
+					Ordering::Greater => Some(Direction::Up),
+				}),
+    	}
 	}
 	
 	fn is_between(&self, pos_1: Pair<T>, pos_2: Pair<T>) -> bool

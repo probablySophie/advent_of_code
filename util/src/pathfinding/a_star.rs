@@ -31,23 +31,20 @@ pub fn get_shortest_distance(map: &VecMap<char>, obstacles: &[char], start: MapL
 }
 
 #[must_use]
-fn get_best_path()
+pub fn get_best_path(map: &VecMap<char>, obstacles: &[char], start: MapLoc, goal: MapLoc) -> Option<(usize, Vec<MapLoc>)>
 {
-	// TODO
+	let (distance, path) = do_the_thing(map, obstacles, start, goal, true)?;
+	let path = path?;
+	Some((distance, path))
 }
 
-#[must_use]
-fn get_path_and_distance()
-{
-	// TODO
-}
 
 // TODO: Allow for diagonal movements
 
 
 // * Maybe this should be turned into a macro instead of a function so that it can take a closure with custom costs for the directions?
 // Using a macro might also allow us to use a pattern for the obstacles too!?
-fn do_the_thing(map: &VecMap<char>, obstacles: &[char], start: MapLoc, goal: MapLoc, get_path: bool)
+fn do_the_thing(map: &VecMap<char>, obstacles: &[char], start: MapLoc, goal: MapLoc, find_path: bool)
 	-> Option<(usize, Option<Vec<MapLoc>>)>
 {
 	let mut open_set: Vec<MapLoc> = vec![ start ];
@@ -72,12 +69,11 @@ fn do_the_thing(map: &VecMap<char>, obstacles: &[char], start: MapLoc, goal: Map
 
 	while ! open_set.is_empty() && goal_node.is_none()
 	{
-		// TODO: Get the Node with the lowest f() score from the open set
 		let i = node_map.at(open_set.remove(0)).unwrap().unwrap();
 		let position = nodes[i].position;
 
 		#[cfg(test)]
-		println!("Open: {} Closed: {} Total: {} Position: {position:2?}", open_set.len(), closed_set.len(), nodes.len());
+		println!("\nOpen: {} Closed: {} Total: {} Position: {position:2?}", open_set.len(), closed_set.len(), nodes.len());
 
 		// Is that node the goal?
 		if position == goal
@@ -144,6 +140,9 @@ fn do_the_thing(map: &VecMap<char>, obstacles: &[char], start: MapLoc, goal: Map
 			{
 				// Create NEW LIFE!!
 				node_map.set(step_pos, Some(nodes.len()));
+				#[cfg(test)]
+				println!("step_pos: {step_pos:2?}, distance/h: {} g:{} {direction:?}", step_pos.distance(goal), nodes[i].g_score + 1);
+				
 				nodes.push(
 					Node {
 						position: step_pos,
@@ -165,14 +164,33 @@ fn do_the_thing(map: &VecMap<char>, obstacles: &[char], start: MapLoc, goal: Map
 
 	let goal_node = goal_node?; // TODO: Allow for not findable
 
-	let distance = 0;
-	if ! get_path
+	let distance = nodes[goal_node].g_score;
+	if ! find_path
 	{
-		return Some(( nodes[goal_node].g_score, None ));
+		return Some(( distance, None ));
 	}
 	// Else
+
+	
 	// TODO: Getting the path
-	Some(( distance, None ))
+	
+	Some(( distance, Some(get_path( &nodes, 0, goal_node )) ))
+}
+
+fn get_path(nodes: &[Node<usize>], start_node: usize, goal_node: usize) -> Vec<MapLoc>
+{
+	let mut path = vec![ nodes[goal_node].position ];
+
+	let mut previous_node = goal_node;
+	while previous_node != start_node
+	{
+		let current_node = nodes[previous_node].previous;
+		path.insert(0, nodes[current_node].position);
+
+		previous_node = current_node;
+	}
+
+	path
 }
 
 #[allow(dead_code)]
@@ -209,6 +227,20 @@ fn binary_insert(open_set: &mut Vec<MapLoc>, nodes: &[Node<usize>], node_map: &N
 		open_set.push(nodes[i].position);
 		return
 	}
+	if open_set.len() == 1
+	{
+		let current_f = nodes[node_map.at_unchecked(open_set[0]).unwrap()].f();
+		let new_f = nodes[i].f();
+
+		if new_f < current_f
+		{
+			open_set.insert(0, nodes[i].position);
+			return;
+		}
+		// Else
+		open_set.push(nodes[i].position);
+		return
+	}
 	
 	let new_f = nodes[i].f();
 
@@ -218,21 +250,26 @@ fn binary_insert(open_set: &mut Vec<MapLoc>, nodes: &[Node<usize>], node_map: &N
 	while start < end
 	{
 		let i_check = (start + end) / 2;
-		let f2 = nodes[ node_map.at( open_set[i_check] ).unwrap().unwrap() ].f();
+		let i2 = node_map.at( open_set[i_check] ).unwrap().unwrap();
+		let f2 = nodes[ i2 ].f();
 		
 		#[cfg(test)]
-		print!("{start}<->{end} {new_f} is {:?} than/to {f2}", new_f.cmp(&f2));
-
+		{
+			println!("Comparing {:2?} with {:2?}", nodes[i].position, nodes[i2].position);
+			println!("start: {start} end: {end} {new_f} is {:?} than/to {f2}", new_f.cmp(&f2));
+		}
 		match (new_f.cmp(&f2), start.abs_diff(end))
 		{
 			(Ordering::Less, 1) =>
 			{
 				open_set.insert(start, nodes[i].position);
+				#[cfg(test)] println!("open_set: {open_set:?}");
 				return;
 			},
 			(Ordering::Greater, 1) =>
 			{
 				open_set.insert(end, nodes[i].position);
+				#[cfg(test)] println!("open_set: {open_set:?}");
 				return;
 			}
 			(Ordering::Less, _) =>
@@ -242,6 +279,7 @@ fn binary_insert(open_set: &mut Vec<MapLoc>, nodes: &[Node<usize>], node_map: &N
 			(Ordering::Equal, _) =>
 			{ 
 				open_set.insert(i_check, nodes[i].position);
+				#[cfg(test)] println!("open_set: {open_set:?}");
 				return;
 			},
 			(Ordering::Greater, _) => {
@@ -250,4 +288,5 @@ fn binary_insert(open_set: &mut Vec<MapLoc>, nodes: &[Node<usize>], node_map: &N
 		}
 	}
 	open_set.insert(start, nodes[i].position);
+	#[cfg(test)] println!("open_set: {open_set:?}");
 }

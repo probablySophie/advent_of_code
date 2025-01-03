@@ -77,7 +77,7 @@ macro_rules! MatchAndTimeTable {
     };
 }
 
-const WARNING_LEVEL: Duration = Duration::new(0, 200_000_000);
+const WARNING_LEVEL: Duration = Duration::from_millis(200);
 fn format_and_mark(duration: Duration) -> String
 {
 	let time_str = format!("{duration:.2?}");
@@ -132,10 +132,10 @@ fn main()
 		"17", seventeen,
 		"18", eighteen,
 		"19", nineteen,
-		// "20", twenty,
-		// "21", twenty_one,
+		"20", twenty,
+		"21", twenty_one,
 		// "22", twenty_two,
-		// "23", twenty_three,
+		"23", twenty_three,
 		// "24", twenty_four,
 		// "25", twenty_five,
 	);
