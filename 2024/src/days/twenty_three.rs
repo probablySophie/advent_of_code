@@ -20,8 +20,8 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 	let time_before = Instant::now();
 	// ~ ~ ~ ~ ~ PRE CALCULATION ~ ~ ~ ~ ~
 
-	let computers = parse_input(INPUT, "The real Input", print_results);
-	// let computers = parse_input(EXAMPLE_INPUT_1, "Example 1", print_results);
+	// let computers = parse_input(INPUT, "The real Input", print_results);
+	let computers = parse_input(EXAMPLE_INPUT_1, "Example 1", print_results);
 
 	// ~ ~ ~ ~ ~ END OF PRE CALCULATION ~ ~ ~ ~ ~
 	let pre_calc_time = time_before.elapsed();
@@ -32,16 +32,16 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 
 	if print_results
 	{
-		util::print_result("Part 1", part_one_time, "Part 1 description", &part_one_result);
+		util::print_result("Part 1", part_one_time, "The number of rings to check is", &part_one_result);
 	}
 
 	// Part 2
-	TimedRun!(time_before, part_two_result, part_two(), part_two_time);
+	TimedRun!(time_before, part_two_result, part_two(&computers), part_two_time);
 	
 	if print_results
 	{
 		println!();
-		util::print_result("Part 2", part_two_time, "Part 2 description", &part_two_result);
+		util::print_result("Part 2", part_two_time, "The largest ring's password is", &part_two_result);
 	}
 
 	// Return how long it took!
@@ -51,66 +51,109 @@ pub fn go(print_results: bool) -> (Duration, Duration, Duration)
 fn part_one(computers: &[ConnectedPoint<ResultType>]) -> ResultType
 {
 	let t_num = "abcdefghijklmnopqrstuvwxyz".find('t').unwrap();
-	// Make a set of all of the loops
-	// For each set of 3, if any have the x value of t_num, inc our count
-	let mut possible_rings = 0;
-	
 	let mut rings: Vec<[usize; 3]> = Vec::new();
+	let mut possible_rings = 0;
 
 	// Computer 1
 	for i1 in 0..computers.len()
-	{
-		// Computer 2
-		for connection_1 in &computers[i1].connections
+	{		
+		for c1 in &computers[i1].connections
 		{
-			let i2 = connection_1.other_point;
+			let i2 = c1.other_point;
+			if i2 < i1 { continue }
 
-			// Computer 3
-			for connection_2 in &computers[i2].connections
+			for c2 in &computers[i2].connections
 			{
-				let i3 = connection_2.other_point;
+				let i3 = c2.other_point;
+				if i3 < i2 { continue }
 
-				for connection_3 in &computers[i3].connections
+				for c3 in &computers[i3].connections
 				{
-					// Have we looped back to the start?
-					if connection_3.other_point == i1
+					if c3.other_point == i1 
+					&& (
+						   computers[i1].position.0 == t_num
+						|| computers[i2].position.0 == t_num 
+						|| computers[i3].position.0 == t_num
+					)
 					{
-						let mut sorted = [i1, i2, i3];
-						sorted.sort();
-
-						if ! find_in(&rings, &sorted)
-						{
-							rings.push(sorted);
-						}						
-					}
+     					possible_rings += 1;
+     				}
 				}
 			}
 		}
 	}
-
-	'ringLoop: for ring in &rings
-	{
-		for computer_i in ring
-		{
-			if computers[*computer_i].position.0 == t_num
-			{
-				possible_rings += 1;
-				println!("{} {} {}",
-					usize_pair_to_name(computers[ring[0]].position),
-					usize_pair_to_name(computers[ring[1]].position),
-					usize_pair_to_name(computers[ring[2]].position)
-				);
-				continue 'ringLoop;
-			}
-		}
-	}
-
+	
 	possible_rings
 }
 
-fn part_two() -> ResultType
+fn part_two(computers: &[ConnectedPoint<ResultType>]) -> String
 {
-	0
+	// Find the largest set of computers where each is connected to ALL the others
+	//     (does not need to be ALL of their own connections)
+	// Then sort the computer names alphabetically, join with commas, and that's the result
+
+	// Can we make a list of all of the loops?
+
+	let mut loops: Vec< Vec<usize> > = Vec::new();
+
+	
+	let mut largest_ring: Vec<usize> = Vec::new();
+
+	let mut current_largest_size = 0;
+	let mut current_best = Vec::new();
+
+	for i1 in 0..computers.len()
+	{
+		let mut good_connections = Vec::new();
+
+		// If we have less than the current largest, then what's even the point?!?
+		if computers[i1].connections.len() < current_largest_size
+		{ continue }
+		
+		// For each of my connections
+		'connection_loop: for c1 in &computers[i1].connections
+		{
+			let i2 = c1.other_point;
+
+			// If each of my connections' has them
+			'validation_loop: for c2 in &computers[i1].connections
+			{
+				let i3 = c2.other_point;
+				if i2 == i3 { continue }
+
+				for c3 in &computers[i3].connections
+				{
+					if c3.other_point == i2
+					{
+						continue 'validation_loop;
+					}
+				}
+
+				// If we're here.  That's bad
+				continue 'connection_loop;
+			}
+			// If we're here, its a good friend
+			good_connections.push(i2);
+		}
+
+		if good_connections.len() > current_largest_size
+		{
+			current_largest_size = good_connections.len();
+			current_best = good_connections;
+		}
+	}
+
+	let mut password = String::new();
+	for (i, computer_i) in current_best.iter().enumerate()
+	{
+		password += &usize_pair_to_name(computers[*computer_i].position);
+		if i + 1 < largest_ring.len()
+		{
+			password += ",";
+		}
+	}
+	
+	password
 }
 
 fn parse_input(input: &str, name: &str, print_results: bool) -> Vec<ConnectedPoint<ResultType>>
