@@ -103,6 +103,7 @@ pub fn find_in<T: std::cmp::PartialEq>(iter: &[T], item: &T) -> bool
 macro_rules! BinaryInsert {
 	($vec:ident, $item:tt, $score:block) =>
 	{
+		use std::cmp::Ordering;
 		if $vec.is_empty() { $vec.push( $item ) }
 		else
 		{
